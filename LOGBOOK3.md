@@ -28,3 +28,48 @@
    - Ainda hoje são identificados ataques *ShellShock*
    - O atacante consegue obter *root* da máquina, sendo que pode fazer/executar o que quiser dentro do servidor remotamente
 
+### Exploit: descrever que tipo de exploit é conhecido e que tipo de automação existe, e.g., no Metasploit (max 4 itens com 20 palavras cada)
+
+Para executar uma bash vulnerável a este exploit, podemos executar, numa máquina com Docker instalado, o seguinte comando:
+
+```bash  
+`ID="$(docker run -d rohitnss/shellshock)" && echo $ID && docker exec -it $ID /bin/bash && docker rm -f $ID > /dev/null`
+```
+
+O comando irá criar um container com a versão da bash vulnerável, executar a bash dentro do container.
+
+Por fim, podemos executar o script de verificação para a vulnerabilidade *ShellShock*:
+
+```bash
+env x='() { :;}; echo VULNERABLE; exit;' bash -c "echo 'NOT VULNERABLE'"
+```
+
+Para sair do container, basta executar o comando `exit` na bash do container. O container será automaticamente removido.
+
+## CTF - Sanity Check
+
+Após lermos a descrição desta challenge, percebemos imediatamente que a challenge estaria no endpoint [/rules](https://www.ctf-fsi.fe.up.pt/rules).
+
+Tendo isto em conta, para resolver a challenge, o nosso procedimento foi:
+
+### Step 1 - Aceder à secção rules
+
+<p align="center" justify="center">
+    <img src="images/logbook3/rules.png" alt="Flag no endpoint /rules"/>
+</p>
+<p align="center">
+    <strong>Fig 1.</strong> Flag no endpoint /rules
+</p>
+
+Ao aceder a este endpoint e ler as regras, percebemos que a flag se encontra em cleartext contida numa das regras.
+
+### Step 2 - Submeter a flag
+
+<p align="center" justify="center">
+    <img src="images/logbook3/submit.png" alt="Submeter a flag"/>
+</p>
+<p align="center">
+    <strong>Fig 2.</strong> Submeter a flag
+</p>
+
+Após submeter a flag, esta challenge de Sanity Check encontra-se resolvida.
