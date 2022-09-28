@@ -55,7 +55,7 @@ Tendo isto em conta, para resolver a challenge, o nosso procedimento foi:
 ### Step 1 - Aceder à secção rules
 
 <p align="center" justify="center">
-    <img src="images/logbook3/rules.png" alt="Flag no endpoint /rules"/>
+    <img src="images/logbook3/rules.png" alt="Flag no endpoint /rules" width="50%"/>
 </p>
 <p align="center">
     <strong>Fig 1.</strong> Flag no endpoint /rules
