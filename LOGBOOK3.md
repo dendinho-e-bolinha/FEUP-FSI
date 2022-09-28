@@ -28,13 +28,13 @@
 
 ### Replicar ataques
 
-Para executar uma bash vulnerável a este exploit, podemos executar, numa máquina com Docker instalado, o seguinte comando:
+Para executar uma *bash* vulnerável a este exploit, podemos executar, numa máquina com Docker instalado, o seguinte comando:
 
 ```bash  
 ID="$(docker run -d rohitnss/shellshock)" && echo $ID && docker exec -it $ID /bin/bash && docker rm -f $ID > /dev/null
 ```
 
-O comando irá criar um container com a versão da bash vulnerável, executar a bash dentro do container.
+O comando irá criar um container com a versão da *bash* vulnerável e executar a *bash* dentro do container.
 
 Por fim, podemos executar o script de verificação para a vulnerabilidade *ShellShock*:
 
@@ -54,17 +54,17 @@ Tendo isto em conta, para resolver a challenge, o nosso procedimento foi:
 
 ## Step 1 - Aceder à secção rules
 
-<figure align="center">
-    <img src="images/logbook3/rules.png" alt="Página de regras com a flag destacada" width="50%" />
-    <figcaption><strong>Fig 1.</strong> Flag no endpoint /rules</figcaption>
+<figure>
+    <img src="images/logbook3/rules.png" alt="Página de regras com a flag destacada" align="center" width="50%" />
+    <figcaption align="center"><strong>Fig 1.</strong> Flag no endpoint /rules</figcaption>
 </figure>
 
 Ao aceder a este endpoint e ler as regras, percebemos que a flag se encontra em *cleartext*, numa das regras.
 
 ## Step 2 - Submeter a flag
 
-<figure align="center">
-   <img src="images/logbook3/submit.png" alt="Ecrã de submissão da flag para a challenge &quot;Sanity Check&quot;" widestath="50%" />
+<figure>
+   <img src="images/logbook3/submit.png" alt="Ecrã de submissão da flag para a challenge &quot;Sanity Check&quot;" align="center" width="50%" />
    <figcaption align="center"><strong>Fig 2.</strong> Submeter a flag</figcaption>
 
 </figure>
