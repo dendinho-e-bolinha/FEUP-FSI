@@ -9,7 +9,7 @@ Esta vulnerabilidade foi descoberta por ![Stéphane Chazelas](https://unix.stack
 Para testarmos se um dispositivo sofre desta vulnerabilidade, podemos correr o seguinte script:
 
 ```bash
-env x='() { :;}; echo VULNERABLE; exit;’ bash -c ‘echo NOT VULNERABLE’
+env x='() { :;}; echo VULNERABLE; exit;' bash -c "echo 'NOT VULNERABLE'"
 ```
 
 -- INFORMATIVO --
@@ -34,10 +34,7 @@ Para emular um ambiente vulnerável a este CVE, pode-se utilizar o Dockerfile cr
 
 ...
 
------ env X=”() { :;} ; echo Bash is Infected” /bin/sh -c “echo completed” ----- check if bash is "corrupted"
-
-
-`docker run -itp 3000:80 rohitnss/shellshock`
+`ID="$(docker run -d rohitnss/shellshock)" && echo $ID && docker exec -it $ID /bin/bash && docker rm -f $ID > /dev/null`
 
 
 Podemos automatizar este exploit usando a framework Metasploit da seguinte forma:
