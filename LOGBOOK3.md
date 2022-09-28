@@ -47,11 +47,18 @@ Introduzido em 1989
 
 ### Exploit: descrever que tipo de exploit é conhecido e que tipo de automação existe, e.g., no Metasploit (max 4 itens com 20 palavras cada)
 
-Para emular um ambiente vulnerável a este CVE, pode-se utilizar o Dockerfile criado no diretório [ambiente](/ambiente/) seguindo as instruções contidas no README.
+Para executar uma bash vulnerável a este exploit, podemos executar, numa máquina com Docker instalado, o seguinte comando:
 
-...
-
+```bash  
 `ID="$(docker run -d rohitnss/shellshock)" && echo $ID && docker exec -it $ID /bin/bash && docker rm -f $ID > /dev/null`
+```
 
+O comando irá criar um container com a versão da bash vulnerável, executar a bash dentro do container.
 
-Podemos automatizar este exploit usando a framework Metasploit da seguinte forma:
+Por fim, podemos executar o script de verificação para a vulnerabilidade *ShellShock*:
+
+```bash
+env x='() { :;}; echo VULNERABLE; exit;' bash -c "echo 'NOT VULNERABLE'"
+```
+
+Para sair do container, basta executar o comando `exit` na bash do container. O container será automaticamente removido.
