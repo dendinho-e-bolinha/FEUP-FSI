@@ -33,7 +33,7 @@
 Para executar uma bash vulnerável a este exploit, podemos executar, numa máquina com Docker instalado, o seguinte comando:
 
 ```bash  
-`ID="$(docker run -d rohitnss/shellshock)" && echo $ID && docker exec -it $ID /bin/bash && docker rm -f $ID > /dev/null`
+ID="$(docker run -d rohitnss/shellshock)" && echo $ID && docker exec -it $ID /bin/bash && docker rm -f $ID > /dev/null
 ```
 
 O comando irá criar um container com a versão da bash vulnerável, executar a bash dentro do container.
@@ -44,7 +44,9 @@ Por fim, podemos executar o script de verificação para a vulnerabilidade *Shel
 env x='() { :;}; echo VULNERABLE; exit;' bash -c "echo 'NOT VULNERABLE'"
 ```
 
-Para sair do container, basta executar o comando `exit` na bash do container. O container será automaticamente removido.
+Para sair do container, basta executar o comando `exit` na *bash* do container. O container será automaticamente removido.
+
+> Também podem ser encontradas, no Metasploit e no ExploitDB, automações para explorar esta vulnerabilidade.
 
 ## CTF - Sanity Check
 
