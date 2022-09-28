@@ -46,7 +46,7 @@ env x='() { :;}; echo VULNERABLE; exit;' bash -c "echo 'NOT VULNERABLE'"
 
 Para sair do container, basta executar o comando `exit` na *bash* do container. O container será automaticamente removido.
 
-> Também podem ser encontradas, no Metasploit e no ExploitDB, automações para explorar esta vulnerabilidade.
+> Podem ser encontrados exemplos de automações para este exploit no [Metasploit](https://null-byte.wonderhowto.com/how-to/exploit-shellshock-web-server-using-metasploit-0186084/) e na [ExploitDB](https://www.exploit-db.com/exploits/34900).
 
 ## CTF - Sanity Check
 
