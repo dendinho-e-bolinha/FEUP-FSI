@@ -54,9 +54,9 @@ Tendo isto em conta, para resolver a challenge, o nosso procedimento foi:
 
 ## Step 1 - Aceder à secção rules
 
-<figure>
-    <img src="images/logbook3/rules.png" alt="Página de regras com a flag destacada" align="center" width="50%" />
-    <figcaption align="center"><strong>Fig 1.</strong> Flag no endpoint /rules</figcaption>
+<figure align="center" width="50%" align="center" justify="center">
+   <img src="images/logbook3/rules.png" alt="Página de regras com a flag destacada" width="50%" align="center" justify="center" />
+   <figcaption width="50%" align="center" justify="center"><strong>Fig 1.</strong> Flag no endpoint /rules</figcaption>
 </figure>
 
 Ao aceder a este endpoint e ler as regras, percebemos que a flag se encontra em *cleartext*, numa das regras.
@@ -64,7 +64,7 @@ Ao aceder a este endpoint e ler as regras, percebemos que a flag se encontra em 
 ## Step 2 - Submeter a flag
 
 <figure>
-   <img src="images/logbook3/submit.png" alt="Ecrã de submissão da flag para a challenge &quot;Sanity Check&quot;" align="center" width="50%" />
+   <img src="images/logbook3/submit.png" alt="Ecrã de submissão da flag para a challenge &quot;Sanity Check&quot;" justify="center" width="50%" />
    <figcaption align="center"><strong>Fig 2.</strong> Submeter a flag</figcaption>
 
 </figure>
