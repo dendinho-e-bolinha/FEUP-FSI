@@ -66,7 +66,6 @@ Ao aceder a este endpoint e ler as regras, percebemos que a flag se encontra em 
 <figure width="50%">
    <img src="images/logbook3/submit.png" alt="Ecrã de submissão da flag para a challenge &quot;Sanity Check&quot; com a flag preenchida com o valor obtido no passo anterior" width="50%" />
    <figcaption><strong>Fig 2.</strong> Submeter a flag</figcaption>
-
 </figure>
 
 Após submeter a flag, a challenge de Sanity Check encontra-se resolvida.

@@ -2,6 +2,30 @@
 
 ## Task 1 : Manipulating Environment Variables
 
+<figure width="50%">
+   <img src="images/logbook4/printenv.png" alt="Usage of &quot;printenv&quot;" width="50%" />
+   <figcaption><strong>Fig 1.</strong> Usage of printenv</figcaption>
+
+</figure>
+
+<figure width="50%">
+   <img src="images/logbook4/env.png" alt="usage of env" width="50%" />
+   <figcaption><strong>Fig 2.</strong> Usage of env</figcaption>
+
+</figure>
+
+<figure width="50%">
+   <img src="images/logbook4/export.png" alt="usage of export" width="50%" />
+   <figcaption><strong>Fig 3.</strong>Usage of export</figcaption>
+
+</figure>
+
+<figure width="50%">
+   <img src="images/logbook4/unset.png" alt="usage of unset" width="50%" />
+   <figcaption><strong>Fig 4.</strong>Usage of unset</figcaption>
+
+</figure>
+
 In this task we learn that:
 
 - *printenv* and *env* are used to display the environment variables set in a machine.
@@ -29,6 +53,12 @@ The results of `Step 1` and `Step 2` are the same, since the child process inher
 ## Task 3 : Environment Variables and *execve()*
 ### Step 1
 
+<figure width="50%">
+   <img src="images/logbook4/environnull.png" alt="running environnull" width="50%" />
+   <figcaption><strong>Fig 5.</strong>Running environ.c</figcaption>
+
+</figure>
+
 The program has no results, since it doesn't inherit any environment variable.
 
 We can see why if we read *execve()* manpage. The function signature is:
@@ -41,6 +71,13 @@ int execve(const char *pathname, char *const argv[],
 The string array *envp* is supposed to have the environment variables and, in this case, we pass *NULL* to it, so, no environment variables are inherited. 
 
 ### Step 2
+
+<figure width="50%">
+   <img src="images/logbook4/environ.png" alt="running environ" width="50%" />
+   <figcaption><strong>Fig 6.</strong>Running environ.c</figcaption\>
+
+</figure>
+
 After adding the environment variables present in *environ* (environment variables array) in the function's parameter *envp*, the program now prints all the environment variables, similar to Task 2.
 
 ### Step 3
