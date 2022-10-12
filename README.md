@@ -1,9 +1,9 @@
 
 Breve descrição do grupo
 
-* Turno: [LM]XX
-* Grupo: YY
+* Turno: L02
+* Grupo: 06
 * Alunos:
-    - Aluno1 upZZZZZ 
-    - Aluno2 upZZZZZ
-    - Aluno3 upZZZZZ
+    - André Costa Lima up202008169
+    - Guilherme Almeida up202006137
+    - Mariana Lobão up202004260
