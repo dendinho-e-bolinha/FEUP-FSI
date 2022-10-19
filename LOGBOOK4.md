@@ -54,7 +54,6 @@ No output is given in step 6, indicating that all environment variables are inhe
    <figcaption><strong>Fig 5. </strong>Overview of task 2</figcaption>
 </figure>
 
----
 ## Task 3 : Environment Variables and *execve()*
 
 In the `Labsetup` folder, you'll find a file called `myenv.c`.
