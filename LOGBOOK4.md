@@ -4,8 +4,6 @@
 
 # SeedLabs Tasks
 
-<br>
-
 ## Task 1 : Manipulating Environment Variables
 
 <figure>
@@ -168,9 +166,18 @@ As we can see, both the modified `PATH` and our custom environment variable were
 The `LD_LIBRARY_PATH` environment variable, however, was not passed to the `Set-UID` program.
 
 When a `Set-UID` program is run, the linker determines that the program is running in secure execution mode.
-When in secure execution mode, the `LD_LIBRARY_PATH` is ignored to prevent the loading of malicious code in these programs.
+When in secure execution mode, the `LD_LIBRARY_PATH` is ignored to prevent the loading and execution of malicious code
+in these programs. 
 > Source: https://man7.org/linux/man-pages/man8/ld.so.8.html
 
+For instance, if a hacker had write access to any directory (for instance, `/tmp`), they could compile a library
+with a special implementation for a command function (`printf`, for instance). In this implementation, he could call
+`system("&lt;command to start a reverse shell&gt;)"` or any other piece of malicious code.
+
+When executing a given `Set-UID` program, the process would execute with the privileges of the program owner amd,
+if `LD_LIBRARY_PATH=/tmp` (or the directory the hacker had access to), the linker would load the malicious `printf`
+implementation and the system would be compromised. The reverse shell (or any other code in the malicious implementation)
+would run as `root`.
 
 <br>
 
@@ -179,13 +186,18 @@ When in secure execution mode, the `LD_LIBRARY_PATH` is ignored to prevent the l
 1. Compile the following program and name it `myls`.
 
 ```c
+#include <stdlib.h>
+
 int main() {
    system("ls");
    return 0;
 }
 ```
 
-2. Save the following malicious script to a file named `ls`.
+2. Make `root` the owner of `myls` using `sudo chown root myls`.
+3. Set the `Set-UID` bit in `myls` using `sudo chmod 4755 myls`.
+
+4. Save the following malicious script to a file named `ls`.
 
 ```sh
 #!/bin/sh
@@ -193,16 +205,34 @@ echo "Executing malicious script..."
 whoami
 ```
 
-3. Add the current working directory, where the script is located, to the `PATH` environ
-<TODO>
+5. Make `ls` executable using `chmod 755 ls`.
+   
+6. Add the current working directory, where the script is located, to the start of the `PATH` environment variable, using `export PATH=$PWD:$PATH`
+
+7. Execute the `myls` program.
+   
+<figure>
+   <img src="images/logbook4/task6/overview.png" alt="Overview of task 6" width="50%" />
+   <figcaption><strong>Fig 9. </strong>Overview of task 6</figcaption>
+</figure>
+
+In this task, we have a `Set-UID` program called `myls` which executes the command `ls`.
+Since the provided path is a relative path (it doesn't start with `/`), the `ls` program will be searched in the directories
+indicated in the `PATH` environment variable. Once it finds a program called `ls` in one of those directories, the shell will
+execute that program.
+
+In this case, it will execute a shell script which prints a message and identifies the effective user name of the process.
+Since `myls` is executed as `root` (since `root` is the owner of the file and the `Set-UID` bit is set), its child
+processes will also be executed with a `root` as their effective user. This means that the shell script is executed as `root`
+as well and that's why `whoami` prints `root`.
+
+> To execute the example successfuly, the `/bin/sh` program needs to be replaced with a shell that doesn't protect itself
+> against being executed from `Set-UID` programs, such as `zsh`. To do that, you should execute `sudo ln -sf /bin/zsh /bin/sh`
+> before executing any of the commands above.
 
 <br>
-
-## Task 7 : The LD PRELOAD Environment Variable and Set-UID Programs
-
-<TODO>
-
----
+<br>
+<br>
 
 # CTF
 
