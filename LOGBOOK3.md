@@ -46,6 +46,8 @@ Para sair do container, basta executar o comando `exit` na *bash* do container. 
 
 > Podem ser encontrados exemplos de automações para este exploit no [Metasploit](https://null-byte.wonderhowto.com/how-to/exploit-shellshock-web-server-using-metasploit-0186084/) e na [ExploitDB](https://www.exploit-db.com/exploits/34900).
 
+---
+
 # CTF - Sanity Check
 
 Após lermos a descrição desta challenge, percebemos imediatamente que a flag da challenge estaria no endpoint [/rules](https://www.ctf-fsi.fe.up.pt/rules).

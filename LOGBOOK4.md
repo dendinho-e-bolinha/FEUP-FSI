@@ -1,28 +1,32 @@
 # Trabalho realizado na Semana #4
 
+---
+
+# SeedLabs Tasks
+
 ## Task 1 : Manipulating Environment Variables
 
-<figure width="50%">
+<figure>
    <img src="images/logbook4/printenv.png" alt="Usage of &quot;printenv&quot;" width="50%" />
-   <figcaption><strong>Fig 1.</strong> Usage of printenv</figcaption>
+   <figcaption><strong>Fig 1. </strong> Usage of &quot;printenv&quot;</figcaption>
 
 </figure>
 
-<figure width="50%">
-   <img src="images/logbook4/env.png" alt="usage of env" width="50%" />
-   <figcaption><strong>Fig 2.</strong> Usage of env</figcaption>
+<figure>
+   <img src="images/logbook4/env.png" alt="Usage of &quot;env&quot;" width="50%" />
+   <figcaption><strong>Fig 2. </strong> Usage of &quot;env&quot;</figcaption>
 
 </figure>
 
-<figure width="50%">
-   <img src="images/logbook4/export.png" alt="usage of export" width="50%" />
-   <figcaption><strong>Fig 3.</strong>Usage of export</figcaption>
+<figure>
+   <img src="images/logbook4/export.png" alt="Usage of &quot;export&quot;" width="50%" />
+   <figcaption><strong>Fig 3. </strong>Usage of &quot;export&quot;</figcaption>
 
 </figure>
 
-<figure width="50%">
-   <img src="images/logbook4/unset.png" alt="usage of unset" width="50%" />
-   <figcaption><strong>Fig 4.</strong>Usage of unset</figcaption>
+<figure>
+   <img src="images/logbook4/unset.png" alt="Usage of &quot;unset&quot;" width="50%" />
+   <figcaption><strong>Fig 4. </strong>Usage of &quot;unset&quot;</figcaption>
 
 </figure>
 
@@ -55,7 +59,7 @@ The results of `Step 1` and `Step 2` are the same, since the child process inher
 
 <figure width="50%">
    <img src="images/logbook4/environnull.png" alt="running environnull" width="50%" />
-   <figcaption><strong>Fig 5.</strong>Running environ.c</figcaption>
+   <figcaption><strong>Fig 5. </strong>Running environ.c</figcaption>
 
 </figure>
 
@@ -124,8 +128,11 @@ Which will afterwards use the *execve* function and the results will be the same
 
 <TODO>
 
+---
 
-## CTF - Desafio 1
+# CTF
+
+## Challenge 1
 
 O desafio 1 consiste em descobrir o CVE presente no website disponibilizado que permite adquirir
 
