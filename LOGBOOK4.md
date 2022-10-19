@@ -95,7 +95,7 @@ the calling process' environment variables will be passed to the resulting proce
 
 ## Task 4 : Environment Variables and system()
 
-1. Compile the following program
+1. Compile the following program.
 
 ```c
 #include <stdio.h>
@@ -107,8 +107,8 @@ int main() {
 }
 ```
 
-2. Execute the program
-3. Analyze the result
+2. Execute the program.
+3. Analyze the result.
 
 <figure>
    <img src="images/logbook4/task4/overview.png" alt="Overview of task 4" width="50%" />
@@ -129,21 +129,45 @@ the results will be the same.
 
 ## Task 5 : Environment Variable and Set-UID Programs
 
-### Step 2
+1. Compile the following program and name it `penv`.
 
-```bash
-[10/02/22]seed@VM:~/.../Labsetup$ gcc newprog.c
-[10/02/22]seed@VM:~/.../Labsetup$ sudo chown root a.out
-[10/02/22]seed@VM:~/.../Labsetup$ ll a.out 
--rwxrwxr-x 1 root seed 16768 Oct  2 21:20 a.out
-[10/02/22]seed@VM:~/.../Labsetup$ sudo chmod 4755 a.out 
-[10/02/22]seed@VM:~/.../Labsetup$ ll a.out 
--rwsr-xr-x 1 root seed 16768 Oct  2 21:20 a.out
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+extern char **environ;
+
+int main() {
+   int i = 0;
+   while (environ[i] != NULL) {
+      printf("%s\n", environ[i]);
+      i++;
+   }
+}
 ```
 
-### Step 3
+2. Make `root` the owner of `penv` using `sudo chown root penv`.
+3. Set the `Set-UID` bit in `penv` using `sudo chmod 4755 penv`.
 
-<TODO>
+4. Change the current shell's environment variables using
+
+```sh
+export PATH=/PWNED:$PATH
+export LD_LIBRARY_PATH=/PWNED
+export PWNED=YES
+```
+
+5. Execute the `penv` program.
+
+<figure>
+   <img src="images/logbook4/task5/overview.png" alt="Overview of task 5" width="50%" />
+   <figcaption><strong>Fig 8. </strong>Overview of task 5</figcaption>
+</figure>
+
+As we can see, both the modified `PATH` and our custom environment variable were passed to the `Set-UID` program.
+The `LD_LIBRARY_PATH` environment variable, however, was not passed to the `Set-UID` program.
+
+We think this is probably done as a safety measure to protect injection of malicious code in privileged programs.
 
 <br>
 
