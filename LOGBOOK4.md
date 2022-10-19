@@ -49,7 +49,7 @@ In the `Labsetup` folder, you'll find a file called `myprintenv.c`.
 3. Comment out the line marked with 1 and uncomment the line marked with 2.
 4. Compile the program again using `gcc myprintenv.c`.
 5. Execute the program and save its output to another file using `a.out > parent_env`.
-6. Compare the two outputs using `diff parent_env child_env`.
+6. Compare the two outputs using `diff child_env parent_env`.
 
 No output is given in step 6, indicating that all environment variables are inherited with fork.
 
@@ -63,40 +63,33 @@ No output is given in step 6, indicating that all environment variables are inhe
 ## Task 3 : Environment Variables and *execve()*
 
 In the `Labsetup` folder, you'll find a file called `myenv.c`.
-### Step 1
 
+1. Compile the `myenv.c` file using `gcc myenv.c`.
+2. Execute the program and save its output to a file using `a.out > null_env`.
+3. Replace `NULL` with `environ` on the invocation of `execve`.
+4. Compile the `myenv.c` file again using `gcc myenv.c`.
+5. Execute the program and save its output to a file using `a.out > environ_env`.
+6. Compare the changes using `diff null_env environ_env`.
 
-
-<figure width="50%">
-   <img src="images/logbook4/environnull.png" alt="running environnull" width="50%" />
-   <figcaption><strong>Fig 5. </strong>Running environ.c</figcaption>
-
+<figure>
+   <img src="images/logbook4/task3/overview.png" alt="Overview of task 3" width="50%" />
+   <figcaption><strong>Fig 6. </strong>Overview of task 3</figcaption>
 </figure>
 
-The program has no results, since it doesn't inherit any environment variable.
+As we can see, the `environ_env` file - when `environ` was passed to `execve` - has more environment variables
+than the `null_env` file - when `NULL` was passed to `execve`. In fact, when `NULL` is passed to `execve`, the
+resulting process has no environment variables.
 
-We can see why if we read *execve()* manpage. The function signature is:
+The declaraction of `execve` helps us understand why this is the case.
 
 ```c
 int execve(const char *pathname, char *const argv[],
                   char *const envp[]);
 ```
 
-The string array *envp* is supposed to have the environment variables and, in this case, we pass *NULL* to it, so, no environment variables are inherited. 
-
-### Step 2
-
-<figure width="50%">
-   <img src="images/logbook4/environ.png" alt="running environ" width="50%" />
-   <figcaption><strong>Fig 6.</strong>Running environ.c</figcaption\>
-
-</figure>
-
-After adding the environment variables present in *environ* (environment variables array) in the function's parameter *envp*, the program now prints all the environment variables, similar to Task 2.
-
-### Step 3
-
-The new program gets its environment variables from the third argument of the *execve*'s function: The *environ* variable, which is essentially an array that contains all the environment variables.
+The `envp` array is the array of environment variables that will be passed to the resulting process. Therefore,
+if we pass `NULL` to it, no environment variables will be passed to the resulting process and, if we pass `environment`,
+the calling process' environment variables will be passed to the resulting process.
 
 <br>
 
