@@ -95,13 +95,35 @@ the calling process' environment variables will be passed to the resulting proce
 
 ## Task 4 : Environment Variables and system()
 
-Using the *system* we have the same results, as expected, since, in reality, we are calling the function:
+1. Compile the following program
 
 ```c
-execl("/bin/sh", "sh", "-c", "usr/bin/env", (char *) NULL);
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+   system("/usr/bin/env");
+   return 0 ;
+}
 ```
 
-Which will afterwards use the *execve* function and the results will be the same (all the environment variables will be printed)
+2. Execute the program
+3. Analyze the result
+
+<figure>
+   <img src="images/logbook4/task3/overview.png" alt="Overview of task 4" width="50%" />
+   <figcaption><strong>Fig 7. </strong>Overview of task 4</figcaption>
+</figure>
+
+As we can see, the program behaves as if we called `env` directly from our shell, showing us all the process'
+environment variables. When using `system`, it's as if we called the function
+
+```c
+execl("/bin/sh", "sh", "-c", "/usr/bin/env", (char *) NULL);
+```
+
+This function will afterwards call the `execve` function with the process' environment variables and, therefore,
+the results will be the same.
 
 <br>
 
