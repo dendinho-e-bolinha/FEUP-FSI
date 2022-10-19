@@ -1,6 +1,10 @@
 # Trabalho realizado na Semana #4
 
+<br>
+
 # SeedLabs Tasks
+
+<br>
 
 ## Task 1 : Manipulating Environment Variables
 
@@ -34,7 +38,7 @@ In this task we learn that:
 
 - To remove an environment variable we can use *unset*, like `unset <ENV_VAR>`
 
----
+<br>
 
 ## Task 2 : Passing Environment Variables from Parent Process to Child Process
 
@@ -53,6 +57,8 @@ No output is given in step 6, indicating that all environment variables are inhe
    <img src="images/logbook4/task2/overview.png" alt="Overview of task 2" width="50%" />
    <figcaption><strong>Fig 5. </strong>Overview of task 2</figcaption>
 </figure>
+
+<br>
 
 ## Task 3 : Environment Variables and *execve()*
 
@@ -92,7 +98,8 @@ After adding the environment variables present in *environ* (environment variabl
 
 The new program gets its environment variables from the third argument of the *execve*'s function: The *environ* variable, which is essentially an array that contains all the environment variables.
 
----
+<br>
+
 ## Task 4 : Environment Variables and system()
 
 Using the *system* we have the same results, as expected, since, in reality, we are calling the function:
@@ -103,7 +110,8 @@ execl("/bin/sh", "sh", "-c", "usr/bin/env", (char *) NULL);
 
 Which will afterwards use the *execve* function and the results will be the same (all the environment variables will be printed)
 
----
+<br>
+
 ## Task 5 : Environment Variable and Set-UID Programs
 
 ### Step 2
@@ -122,12 +130,14 @@ Which will afterwards use the *execve* function and the results will be the same
 
 <TODO>
 
----
+<br>
+
 ## Task 6 : The PATH Environment Variable and Set-UID Programs
 
 <TODO>
 
----
+<br>
+
 ## Task 7 : The LD PRELOAD Environment Variable and Set-UID Programs
 
 <TODO>
