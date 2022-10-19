@@ -167,7 +167,7 @@ export PWNED=YES
 As we can see, both the modified `PATH` and our custom environment variable were passed to the `Set-UID` program.
 The `LD_LIBRARY_PATH` environment variable, however, was not passed to the `Set-UID` program.
 
-We think this is probably done as a safety measure to protect injection of malicious code in privileged programs.
+We think this is probably done as a safety measure to protect against injection of malicious code in privileged programs.
 
 <br>
 
