@@ -1,7 +1,5 @@
 # Trabalho realizado na Semana #4
 
----
-
 # SeedLabs Tasks
 
 ## Task 1 : Manipulating Environment Variables
