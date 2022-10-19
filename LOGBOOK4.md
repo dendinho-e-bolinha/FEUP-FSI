@@ -167,12 +167,32 @@ export PWNED=YES
 As we can see, both the modified `PATH` and our custom environment variable were passed to the `Set-UID` program.
 The `LD_LIBRARY_PATH` environment variable, however, was not passed to the `Set-UID` program.
 
-We think this is probably done as a safety measure to protect against injection of malicious code in privileged programs.
-
+When a `Set-UID` program is run, the linker determines that the program should run in secure execution mode.
+When in secure executing mode, the `LD_LIBRARY_PATH` is ignored to prevent the loading of malicious code in these programs.
+> Source: https://man7.org/linux/man-pages/man8/ld.so.8.html
+> 
 <br>
 
 ## Task 6 : The PATH Environment Variable and Set-UID Programs
 
+1. Compile the following program and name it `myls`.
+
+```c
+int main() {
+   system("ls");
+   return 0;
+}
+```
+
+2. Save the following malicious script to a file named `ls`.
+
+```sh
+#!/bin/sh
+echo "Executing malicious script..."
+whoami
+```
+
+3. Add the current working directory, where the script is located, to the `PATH` environ
 <TODO>
 
 <br>
