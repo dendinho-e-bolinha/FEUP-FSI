@@ -86,7 +86,7 @@ int execve(const char *pathname, char *const argv[],
 ```
 
 The `envp` array is the array of environment variables that will be passed to the resulting process. Therefore,
-if we pass `NULL` to it, no environment variables will be passed to the resulting process and, if we pass `environment`,
+if we pass `NULL` to it, no environment variables will be passed to the resulting process and, if we pass `environ`,
 the calling process' environment variables will be passed to the resulting process.
 
 <br>
