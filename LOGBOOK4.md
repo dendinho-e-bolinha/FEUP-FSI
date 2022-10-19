@@ -111,7 +111,7 @@ int main() {
 3. Analyze the result
 
 <figure>
-   <img src="images/logbook4/task3/overview.png" alt="Overview of task 4" width="50%" />
+   <img src="images/logbook4/task4/overview.png" alt="Overview of task 4" width="50%" />
    <figcaption><strong>Fig 7. </strong>Overview of task 4</figcaption>
 </figure>
 
