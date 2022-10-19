@@ -5,27 +5,23 @@
 ## Task 1 : Manipulating Environment Variables
 
 <figure>
-   <img src="images/logbook4/printenv.png" alt="Usage of &quot;printenv&quot;" width="50%" />
+   <img src="images/logbook4/task1/printenv.png" alt="Usage of &quot;printenv&quot;" width="50%" />
    <figcaption><strong>Fig 1. </strong> Usage of &quot;printenv&quot;</figcaption>
-
 </figure>
 
 <figure>
-   <img src="images/logbook4/env.png" alt="Usage of &quot;env&quot;" width="50%" />
+   <img src="images/logbook4/task1/env.png" alt="Usage of &quot;env&quot;" width="50%" />
    <figcaption><strong>Fig 2. </strong> Usage of &quot;env&quot;</figcaption>
-
 </figure>
 
 <figure>
-   <img src="images/logbook4/export.png" alt="Usage of &quot;export&quot;" width="50%" />
+   <img src="images/logbook4/task1/export.png" alt="Usage of &quot;export&quot;" width="50%" />
    <figcaption><strong>Fig 3. </strong>Usage of &quot;export&quot;</figcaption>
-
 </figure>
 
 <figure>
-   <img src="images/logbook4/unset.png" alt="Usage of &quot;unset&quot;" width="50%" />
+   <img src="images/logbook4/task1/unset.png" alt="Usage of &quot;unset&quot;" width="50%" />
    <figcaption><strong>Fig 4. </strong>Usage of &quot;unset&quot;</figcaption>
-
 </figure>
 
 In this task we learn that:
@@ -42,18 +38,29 @@ In this task we learn that:
 
 ## Task 2 : Passing Environment Variables from Parent Process to Child Process
 
-### Step 1 - Child Process
-The child process prints the environment variables
+In the `Labsetup` folder, you'll find a file called `myprintenv.c`.
 
-### Step 2 - Parent Process
-The parent process also prints the same environment variables
+1. Compile the `myprintenv.c` file using `gcc myprintenv.c`.
+2. Execute the program and save its output a file using `a.out > child_env`. 
+3. Comment out the line marked with 1 and uncomment the line marked with 2.
+4. Compile the program again using `gcc myprintenv.c`.
+5. Execute the program and save its output to another file using `a.out > parent_env`.
+6. Compare the two outputs using `diff parent_env child_env`.
 
-### Step 3 - Conclusions
-The results of `Step 1` and `Step 2` are the same, since the child process inherits the env variables from its parent.
+No output is given in step 6, indicating that all environment variables are inherited with fork.
+
+<figure>
+   <img src="images/logbook4/task2/overview.png" alt="Overview of task 2" width="50%" />
+   <figcaption><strong>Fig 5. </strong>Overview of task 2</figcaption>
+</figure>
 
 ---
 ## Task 3 : Environment Variables and *execve()*
+
+In the `Labsetup` folder, you'll find a file called `myenv.c`.
 ### Step 1
+
+
 
 <figure width="50%">
    <img src="images/logbook4/environnull.png" alt="running environnull" width="50%" />
