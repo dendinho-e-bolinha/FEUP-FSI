@@ -172,7 +172,7 @@ in these programs.
 
 For instance, if a hacker had write access to any directory (for instance, `/tmp`), they could compile a library
 with a special implementation for a command function (`printf`, for instance). In this implementation, he could call
-`system("&lt;command to start a reverse shell&gt;)"` or any other piece of malicious code.
+`system("<command to start a reverse shell>")` or any other piece of malicious code.
 
 When executing a given `Set-UID` program, the process would execute with the privileges of the program owner amd,
 if `LD_LIBRARY_PATH=/tmp` (or the directory the hacker had access to), the linker would load the malicious `printf`
