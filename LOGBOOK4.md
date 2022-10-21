@@ -223,7 +223,7 @@ execute that program.
 
 In this case, it will execute a shell script which prints a message and identifies the effective user name of the process.
 Since `myls` is executed as `root` (since `root` is the owner of the file and the `Set-UID` bit is set), its child
-processes will also be executed with a `root` as their effective user. This means that the shell script is executed as `root`
+processes will also be executed with `root` as their effective user. This means that the shell script is executed as `root`
 as well and that's why `whoami` prints `root`.
 
 > To execute the example successfuly, the `/bin/sh` program needs to be replaced with a shell that doesn't protect itself
