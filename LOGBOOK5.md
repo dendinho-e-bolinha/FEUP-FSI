@@ -1,8 +1,10 @@
-# LOGBOOK 5
+# Trabalho realizado na semana #5
 
-## SEED Labs - Buffer Overflow Attack Lab (Set-UID Version)
+<br>
 
-### Preparation
+# SEED Labs - Buffer Overflow Attack Lab (Set-UID Version)
+
+## Preparation
 
 To prepare our systems for this lab, we followed the Environment Setup section of the guide:
 
@@ -14,13 +16,86 @@ To prepare our systems for this lab, we followed the Environment Setup section o
    - Execute `sudo ln -sf /bin/zsh /bin/sh`
    - This command is executed because, normally, `/bin/sh` points to `/bin/dash`. Both `dash` and `bash` contain special protections against being executed from a program with the Set-UID bit set, which is the program we will be trying to attack. `zsh`, on the other hand, doesn't have that kind of protections.
 
-### Tasks
+<br>
 
-The guides for each of the tasks are located at:
+## Task 1 : Getting Familiar with Shellcode
 
-- [Task #1](guides/logbook-5/task1.md)
-- [Task #2](guides/logbook-5/task2.md)
-- [Task #3](guides/logbook-5/task3.md)
+The goal of this task is to understand how a shellcode works and how the execution of it inside another program works.
+
+We are given a shellcode - and the corresponding binary version - that executes `/bin//sh` (which is the same as `/bin/sh`) using `execve`.
+
+To execute this shellcode, we can compile the program `call_shellcode.c`.
+
+1. Run `cd shellcode`
+2. Run `make`
+   - This will compile the file code into two different executables: `a64.out` and `a32.out`. We are interested in the 32-bit architecture.
+3. Run `a32.out`
+   - This will execute the shellcode and, therefore, `/bin/sh`. Inside the shell, you can execute `whoami` and confirm you are executing the shell as `seed`. You may use the shell to freely execute any command, taking advantage of the machine.
+4. Run `make setuid`
+   - After compilation, this will set the Set-UID bit of `a32.out` and it's owner will be changed to `root`. This means that when `a32.out` is executed, the process's user ID to that of `root`.
+5. Run `a32.out`
+6. Inside the shell, execute `whoami`
+   - The name `root` should appear on the screen, indicating you are executing the shell as `root`. Any command you execute will be executed as `root` as well. 
+
+<figure>
+   <img src="images/logbook5/task1/overview.png" alt="Overview of task 1" width="50%" />
+   <figcaption><strong>Fig 1. </strong>Overview of task 1</figcaption>
+</figure>
+
+<br>
+
+## Task 2 : Understanding the Vulnerable Program
+
+In this task, we are given a closer look at the source code of the program we will be trying to exploit.
+
+In particular, we noticed that, in the `bof` function, the `str` array is coppied to `buffer`, however, `str` can have size up to 517 while `buffer` only has a size of 100 bytes. Since `strcpy` copies data until it reaches a null terminator, this means that there will be a buffer overflow.
+
+Since the `str` array comes from user input, this means we will be able to place our shellcode in the `badfile` file and overwrite the return address of `bof`, in order to execute our shellcode, which will be in the stack.
+
+<br>
+
+## Task 3 : Launching Attack on 32-bit Program (Level 1)
+
+In the investigation phase, we ran the following commands:
+
+1. `make`, to compile the program with the proper flags (`-g` for debugging, `-m32` for 32-bit compilation, `-z execstack` to allow code execution from the stack and `-fno-stack-protector` to remove any protections against buffer overflows in the stack).
+2. `touch badfile`, to create the badfile so that the read doesn't fail.
+3. `gbd stack-L1-dbg`, to start a debugging session on the console. By specifying the program in the command, gdb automatically loads the program's symbols (functions, global variables, ...).
+4. Inside the debugging session, we run:
+   
+   1. `b bof` to create a breakpoint at the start of the `bof` function
+   2. `run` to execute the program until `bof` is called
+   3. At this point, we can create new breakpoints, run `next` to debug the code step by step or run `p <expression>` to print the value of an expression. We followed the guide and executed `next`. This will stop execution at the `strcpy` call.
+   4. `p $ebp` to print the value of the `ebp` register. The text displayed on the terminal was `$1 = (void *) 0xffffca88`, indicating that the `ebp` register has the value `0xffffca88`. This address is the address of `bof`'s stack frame, where its return address is located.
+   5. `p &buffer` to print the address where the `buffer` starts. This will be useful for us to know how many bytes we must write in order to reach `bof`'s stack frame.
+   6. `quit` to exit the debugging session.
+
+<figure>
+   <img src="images/logbook5/task3/overview/1.png" alt="Compiling the program and creating &quot;badfile&quot;" width="50%" />
+   <figcaption><strong>Fig 2. </strong>Compiling the program and creating &quot;badfile&quot;</figcaption>
+</figure>
+<figure>
+   <img src="images/logbook5/task3/overview/2.png" alt="Starting the debugging session" width="50%" />
+   <figcaption><strong>Fig 3. </strong>Starting the debugging session</figcaption>
+</figure>
+<figure>
+   <img src="images/logbook5/task3/overview/3.png" alt="Creating a breakpoint at the start of bof" width="50%" />
+   <figcaption><strong>Fig 4. </strong>Creating a breakpoint at the start of <code>bof</code></figcaption>
+</figure>
+<figure>
+   <img src="images/logbook5/task3/overview/4.png" alt="Executing the program until bof is reached" width="50%" />
+   <figcaption><strong>Fig 5. </strong>Executing the program until <code>bof</code> is reached</figcaption>
+</figure>
+<figure>
+   <img src="images/logbook5/task3/overview/5.png" alt="Printing the addresses of bof&apos;s stack frame and buffer&apos;s address" width="50%" />
+   <figcaption><strong>Fig 6. Printing the addresses of <code>bof</code>&apos;s stack frame and <code>buffer</code>&apos;s address</strong></figcaption>
+</figure>
+
+<br>
+<br>
+<br>
+
+# CTF
 
 ## CTF - Desafio 1
 
