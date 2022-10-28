@@ -65,30 +65,75 @@ In the investigation phase, we ran the following commands:
    
    1. `b bof` to create a breakpoint at the start of the `bof` function
    2. `run` to execute the program until `bof` is called
-   3. At this point, we can create new breakpoints, run `next` to debug the code step by step or run `p <expression>` to print the value of an expression. We followed the guide and executed `next`. This will stop execution at the `strcpy` call.
-   4. `p $ebp` to print the value of the `ebp` register. The text displayed on the terminal was `$1 = (void *) 0xffffca88`, indicating that the `ebp` register has the value `0xffffca88`. This address is the address of `bof`'s stack frame, where its return address is located.
-   5. `p &buffer` to print the address where the `buffer` starts. This will be useful for us to know how many bytes we must write in order to reach `bof`'s stack frame.
+   3. At this point, we can create new breakpoints, run `next` to debug the code step by step or run `p <expression>` to print the value of an expression. `next`. This will stop execution at the `strcpy` call.
+   4. `p $ebp` to print the value of the `ebp` register. The text displayed on the terminal was `$1 = (void *) 0xffffcac8`, indicating that the `ebp` register has the value `0xffffcac8`. This address is the address of `bof`'s stack frame, where its return address is located.
+   5. `p &buffer` to print the address where the `buffer` starts. This will be useful for us to know how many bytes we must write in order to reach `bof`'s return address.
    6. `quit` to exit the debugging session.
 
 <figure>
-   <img src="images/logbook5/task3/overview/1.png" alt="Compiling the program and creating &quot;badfile&quot;" width="50%" />
+   <img src="images/logbook5/task3/1.png" alt="Compiling the program and creating &quot;badfile&quot;" width="50%" />
    <figcaption><strong>Fig 2. </strong>Compiling the program and creating &quot;badfile&quot;</figcaption>
 </figure>
 <figure>
-   <img src="images/logbook5/task3/overview/2.png" alt="Starting the debugging session" width="50%" />
+   <img src="images/logbook5/task3/2.png" alt="Starting the debugging session" width="50%" />
    <figcaption><strong>Fig 3. </strong>Starting the debugging session</figcaption>
 </figure>
 <figure>
-   <img src="images/logbook5/task3/overview/3.png" alt="Creating a breakpoint at the start of bof" width="50%" />
+   <img src="images/logbook5/task3/3.png" alt="Creating a breakpoint at the start of bof" width="50%" />
    <figcaption><strong>Fig 4. </strong>Creating a breakpoint at the start of <code>bof</code></figcaption>
 </figure>
 <figure>
-   <img src="images/logbook5/task3/overview/4.png" alt="Executing the program until bof is reached" width="50%" />
+   <img src="images/logbook5/task3/4.png" alt="Executing the program until bof is reached" width="50%" />
    <figcaption><strong>Fig 5. </strong>Executing the program until <code>bof</code> is reached</figcaption>
 </figure>
 <figure>
-   <img src="images/logbook5/task3/overview/5.png" alt="Printing the addresses of bof&apos;s stack frame and buffer&apos;s address" width="50%" />
-   <figcaption><strong>Fig 6. Printing the addresses of <code>bof</code>&apos;s stack frame and <code>buffer</code>&apos;s address</strong></figcaption>
+   <img src="images/logbook5/task3/5.png" alt="Executing the program until bof is reached" width="50%" />
+   <figcaption><strong>Fig 6. </strong>Stepping over to the first line of code of <code>bof</code></figcaption>
+</figure>
+<figure>
+   <img src="images/logbook5/task3/6.png" alt="Printing the value of the frame pointer and buffer&apos;s address" width="50%" />
+   <figcaption><strong>Fig 7. </strong>Printing the value of the frame pointer and <code>buffer</code>&apos;s address</figcaption>
+</figure>
+
+
+5. From the latter steps, we learn that, inside `bof`:
+
+    - `buffer` is located at `0xffffca5c` (can vary from computer to computer)
+    - `ebp`, the frame pointer, is `0xffffcac8` (can vary from computer to computer)
+
+This means that the 4 bytes located at `0xffffcac8` are a pointer to `dummy_function`'s stack frame and that the 4 bytes following that will be `bof`'s return address - those are the bytes we want to overwrite.
+
+The values we should change in `exploit.py` are:
+   
+   - `shellcode`: the shellcode that will be injected.
+   - `start`: refers to the beginning position of our shellcode, relative to the start of `buffer`.
+   - `ret`: refers to the the return address we want our program to jump to after `bof` ends its execution.
+   - `offset`: refers to the position of `bof`'s return address, relative to the start of `buffer`.
+
+For `shellcode`, we can simply reuse the one from the 1st task.
+
+Since the addresses will vary based on whether we execute the program with `gdb`, there is no precise way to find `buffer`'s address in the version with the `Set-UID` bit set. As such, in order to maximize our chances of executing the shellcode, we'll use a NOP sled. Since 517 bytes will be read, we can get a bigger NOP sled if we place our shellcode in the address space after `bof`'s return address, in particular, at the end of the 517 bytes. Therefore, `start = len(content) - len(shellcode)`.
+
+We want to overwrite `bof`'s return address, so that we can execute the shellcode. As such, in the exploit, we use an `offset` of `ebp - buffer + 4 (the size of a pointer in a 32-bit executable - the frame pointer) = 112`.
+
+We want to execute our shellcode, but if we just use `ret = <result of p &buffer>`, we will jump to a NOP sled and, eventually, "slide" into `bof`'s return address, which will be interpreted as processor instructions, and will, most likely, be invalid and make our program crash. Therefore, we need `ret` to be greater than the address of `bof`'s return address. As such, we can experiment with `ret = 0xffffca5c + offset + C` where C is a constant (with `gdb`, C >= 1; without `gdb`, normally, C >= 300).
+
+With these parameters set, we just need to generate the payload and run the program.
+
+6. Put these parameters in `exploit.py`.
+
+<figure>
+   <img src="images/logbook5/task3/7.png" alt="The resulting &quot;exploit.py&quot;" width="50%" />
+   <figcaption><strong>Fig 8. </strong>The resulting <code>exploit.py</code></figcaption>
+</figure>
+
+7.  Run `exploit.py`.
+8.  Run `stack-L1`.
+9.  At this point, you should be in a root shell since any child process of `stack-L1` will also be executed with `root`'s effective user ID. Run `whoami` to verify this.
+
+<figure>
+   <img src="images/logbook5/task3/8.png" alt="Executing the vulnerable program" width="50%" />
+   <figcaption><strong>Fig 9. </strong>Executing the vulnerable program</figcaption>
 </figure>
 
 <br>
