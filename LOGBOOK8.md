@@ -27,7 +27,7 @@ The goal of this task is to understand the structure of the database that is bei
 2. Get a shell inside the database, by executing `mysql -u root -pdees`.
    
 <figure>
-   <img src="images/logbook7/task1/1.png" alt="Getting a shell on the MySQL container" width="50%" />
+   <img src="images/logbook8/task1/1.png" alt="Getting a shell on the MySQL container" width="50%" />
    <figcaption><strong>Fig 1. </strong>Getting a shell on the MySQL container</figcaption>
 </figure>
 
@@ -38,7 +38,7 @@ The goal of this task is to understand the structure of the database that is bei
    3. Run `select * from credential where name = 'Alice';` to print all of Alice's profile information.
 
 <figure>
-   <img src="images/logbook7/task1/2.png" alt="Print all of Alice's profile information" width="50%" />
+   <img src="images/logbook8/task1/2.png" alt="Print all of Alice's profile information" width="50%" />
    <figcaption><strong>Fig 2. </strong>Print all of Alice's profile information</figcaption>
 </figure>
 
@@ -53,7 +53,7 @@ First, we'll inspect the code on the server. By going to `Labsetup/image-www/Cod
 We found the vulnerable SELECT statement and it's presented below:
 
 <figure>
-   <img src="images/logbook7/task2/1.png" alt="The vulnerable SELECT statement" width="50%" />
+   <img src="images/logbook8/task2/1.png" alt="The vulnerable SELECT statement" width="50%" />
    <figcaption><strong>Fig 3. </strong>The vulnerable SELECT statement</figcaption>
 </figure>
 
@@ -84,14 +84,14 @@ After finding the vulnerable statement, we did the following steps:
     - Password: *anything you want*
 
 <figure>
-   <img src="images/logbook7/task2/web/1.png" alt="The payload for the SQL Injection attack" width="50%" />
+   <img src="images/logbook8/task2/web/1.png" alt="The payload for the SQL Injection attack" width="50%" />
    <figcaption><strong>Fig 4. </strong>The payload for the SQL Injection attack</figcaption>
 </figure>
    
 3. Submit the form.
    
 <figure>
-   <img src="images/logbook7/task2/web/2.png" alt="Logged in as admin, with SQL Injection" width="50%" />
+   <img src="images/logbook8/task2/web/2.png" alt="Logged in as admin, with SQL Injection" width="50%" />
    <figcaption><strong>Fig 5. </strong>Logged in as admin, with SQL Injection</figcaption>
 </figure>
 
@@ -105,8 +105,8 @@ After finding the vulnerable statement, we did the following steps:
    - Some special characters, such as `'` and spaces need to be encoded when used in a URL. As such, we must use `%20` instead of spaces and `%27` instead of single quotes, which are the corresponding URL-encoded version of those characters.
    
 <figure>
-   <img src="images/logbook7/task2/curl/1.png" alt="First part of the output of curl" width="50%" />
-   <img src="images/logbook7/task2/curl/2.png" alt="Second part of the output of curl" width="50%" />
+   <img src="images/logbook8/task2/curl/1.png" alt="First part of the output of curl" width="50%" />
+   <img src="images/logbook8/task2/curl/2.png" alt="Second part of the output of curl" width="50%" />
    <figcaption><strong>Figs 6 and 7. </strong>HTML code of admin page, with SQL Injection and curl</figcaption>
 </figure>
 
@@ -126,14 +126,14 @@ This means that the payload will be as follows:
 If we submit this payload on the webpage, however, we will get an error.
 
 <figure>
-   <img src="images/logbook7/task2/multistatement/1.png" alt="Error after submitting the previous payload" width="50%" />
+   <img src="images/logbook8/task2/multistatement/1.png" alt="Error after submitting the previous payload" width="50%" />
    <figcaption><strong>Fig 8. </strong>Error after submitting the previous payload</figcaption>
 </figure>
 
 This error happens because the server is configured to only execute a single statement per query. To change this, we will need to edit the `unsafe_home.php` file, as shown below.
 
 <figure>
-   <img src="images/logbook7/task2/multistatement/2.png" alt="Code after changes have been applied" width="50%" />
+   <img src="images/logbook8/task2/multistatement/2.png" alt="Code after changes have been applied" width="50%" />
    <figcaption><strong>Fig 9. </strong>Code after changes have been applied (lines 75 - 78)</figcaption>
 </figure>
 
@@ -155,7 +155,7 @@ After the server is back online, if we submit the payload again, the same user d
 To fix this, we can simply reload the page, which will in turn execute the query again and return the updated user details, as shown below.
 
 <figure>
-   <img src="images/logbook7/task2/multistatement/3.png" alt="User details after resubmitting the SQL Injection payload" width="50%" />
+   <img src="images/logbook8/task2/multistatement/3.png" alt="User details after resubmitting the SQL Injection payload" width="50%" />
    <figcaption><strong>Fig 10. </strong>User details after resubmitting the SQL Injection payload</figcaption>
 </figure>
 

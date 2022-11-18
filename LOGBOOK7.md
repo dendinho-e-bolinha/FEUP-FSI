@@ -39,12 +39,12 @@ In the server logs, we can see the following:
 
 Terminal 1 | Terminal 2
 :---------:|:---------:
-![Server logs after the "hello" string is sent](images/logbook6/task1/00.png) | ![Sending the "hello" string to the server](images/logbook6/task1/01.png)
+![Server logs after the "hello" string is sent](images/logbook7/task1/00.png) | ![Sending the "hello" string to the server](images/logbook7/task1/01.png)
 
 2. Write the payload to a file using `echo '%3$n' > payload.txt`.
 
     - After reading the guide (Listing 1), we would assume that our exploit could be designed taking into account the fact that the `myprintf` function doesn't have any local variables. However, our testing reveals that this assumption is misleading. We used `gdb` to inspect the stack right before `printf(msg)` is called.
-    ![Stack before printf is called](images/logbook6/task1/stack.png)
+    ![Stack before printf is called](images/logbook7/task1/stack.png)
     As you can see, at offset `0008`, we have the frame pointer and, at `0004`, we have the `target` variable, even though there are no `target` variables defined in `myprintf`. The reason we suspect this happens is that a previous `printf` call used `target` and, because of that, its value had to be pushed onto the stack. Since another `printf` is going to use the `target` variable later, the compiler optimizes the code and doesn't remove it from the stack after the first `printf` that uses the `target` variable returns. 
   
     - Since we are trying to crash the program, one way to do it is to write to a write-protected section. For instance, if we try to write anything in the `.text` section, we will most likely get a segmentation fault. Analyzing the stack once again, we can see that, at offset `0012`, we have a pointer to an instruction in the `.text` section. If we try to write to this location, we should get a crash.
@@ -57,7 +57,7 @@ Terminal 1 | Terminal 2
     
 Terminal 1 | Terminal 2
 :---------:|:---------:
-![Server logs after the payload was sent to the server](images/logbook6/task1/02.png) | ![Sending the payload to the server](images/logbook6/task1/03.png)
+![Server logs after the payload was sent to the server](images/logbook7/task1/02.png) | ![Sending the payload to the server](images/logbook7/task1/03.png)
 
 <br>
 
@@ -96,7 +96,7 @@ To print out the data saved on the stack when the `printf` function is executed.
 
 Terminal 1 | Terminal 2
 :---------:|:---------:
-![Server logs after the payload was sent to the server](images/logbook6/task2/00.png) | ![Sending the payload to the server](images/logbook6/task2/01.png)
+![Server logs after the payload was sent to the server](images/logbook7/task2/00.png) | ![Sending the payload to the server](images/logbook7/task2/01.png)
 
 ### B. Heap Data
 
@@ -133,7 +133,7 @@ Terminal 1 | Terminal 2
 
 Terminal 1 | Terminal 2
 :---------:|:---------:
-![Server logs after the payload was sent to the server](images/logbook6/task2/02.png) | ![Sending the payload to the server](images/logbook6/task2/03.png)
+![Server logs after the payload was sent to the server](images/logbook7/task2/02.png) | ![Sending the payload to the server](images/logbook7/task2/03.png)
 
 <br>
 
@@ -175,7 +175,7 @@ This is divided into two sub-tasks:
 
 Terminal 1 | Terminal 2
 :---------:|:---------:
-![Server logs after the payload was sent to the server](images/logbook6/task3/00.png) | ![Sending the payload to the server](images/logbook6/task3/01.png)
+![Server logs after the payload was sent to the server](images/logbook7/task3/00.png) | ![Sending the payload to the server](images/logbook7/task3/01.png)
 
 ### B. Change the value to 0x5000
 
@@ -211,7 +211,7 @@ Terminal 1 | Terminal 2
 
 Terminal 1 | Terminal 2
 :---------:|:---------:
-![Server logs after the payload was sent to the server](images/logbook6/task3/02.png) | ![Sending the payload to the server](images/logbook6/task3/03.png)
+![Server logs after the payload was sent to the server](images/logbook7/task3/02.png) | ![Sending the payload to the server](images/logbook7/task3/03.png)
 
 <br>
 <br>
@@ -240,7 +240,7 @@ Watching this, we know that the printf is vulnerable to format strings and even 
 
 We have also noticed that the flag is being loaded into a global variable `flag`, so, we can easily use GDB to find its address, by doing `p &flag`.
 
-![CTF Challenge 1](/images/logbook6/00.png)
+![CTF Challenge 1](/images/logbook7/00.png)
 
 - In contrary to SEED Labs, we didn't need to calculate the offset, because we got our input imediatly:
 
@@ -284,6 +284,6 @@ p.sendline(payload)
 p.interactive()
 ```
 
-![CTF Challenge 2](/images/logbook6/01.png)
+![CTF Challenge 2](/images/logbook7/01.png)
 
 Note: The notation `%<n>$d` is just the same as applying the string formatter to the n-th value, but in a less exhaustive way.  
