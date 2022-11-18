@@ -361,3 +361,16 @@ As we can see, Bobby's password has been changed.
    <img src="images/logbook8/task3/c/3.png" alt="Successful login into Bobby's account" width="50%" />
    <figcaption><strong>Fig 22. </strong>Successful login into Bobby's account</figcaption>
 </figure>
+
+<br>
+<br>
+<br>
+
+# CTF
+
+## CTF - Challenge 1
+
+<br>
+
+## CTF - Challenge 2
+
