@@ -245,12 +245,13 @@ As we have seen in previous tasks, this code is vulnerable to SQL Injection beca
       
    - Therefore one possible payload is `', salary='123456`.
 
+   
+3. Submit the "Edit Profile" form with the payload on the phone number field.
+
 <figure>
    <img src="images/logbook8/task3/a/3.png" alt="Our payload" width="50%" />
    <figcaption><strong>Fig 15. </strong>Our payload</figcaption>
 </figure>
-   
-3. Submit the "Edit Profile" form with the payload on the phone number field.
 
 As we can see, Alice's salary has been changed to 123456.
 
@@ -280,12 +281,13 @@ As we can see, Alice's salary has been changed to 123456.
 
       - In conclusion, our final payload will be `', salary='1' WHERE Name='Boby'; -- `.
 
+
+3. Submit the "Edit Profile" form with the payload on the phone number field.
+
 <figure>
    <img src="images/logbook8/task3/b/1.png" alt="Our payload" width="50%" />
    <figcaption><strong>Fig 17. </strong>Our payload</figcaption>
 </figure>
-
-3. Submit the "Edit Profile" form with the payload on the phone number field.
 
 4. Log out of the website.
 
@@ -334,12 +336,12 @@ As we can see, Bobby's salary has been changed to 1.
       
       - Therefore, our payload will be `', Password='2409cc93fb815f9da0947627730f3d006aefb4f2' WHERE Name='Boby'; -- `.
 
+3. Submit the "Edit Profile" form with the payload on the phone number field.
+
 <figure>
    <img src="images/logbook8/task3/c/1.png" alt="Our payload" width="50%" />
    <figcaption><strong>Fig 20. </strong>Our payload</figcaption>
 </figure>
-
-3. Submit the "Edit Profile" form with the payload on the phone number field.
 
 4. Log out of the website.
 
