@@ -185,7 +185,8 @@ To avoid having previous tasks interfere with this one, we reset the web server 
 
 <figure>
    <img src="images/logbook8/task3/1.png" alt="Resetting the task containers" width="50%" />
-   <figcaption><strong>Fig 11. </strong>Resetting the task containers</figcaption>
+   <img src="images/logbook8/task3/2.png" alt="Resetting the task containers" width="50%" />
+   <figcaption><strong>Figs 11 and 12. </strong>Resetting the task containers</figcaption>
 </figure>
 
 
@@ -216,12 +217,12 @@ As we have seen in previous tasks, this code is vulnerable to SQL Injection beca
 
 <figure>
    <img src="images/logbook8/task3/a/1.png" alt="Logging into Alice's account" width="50%" />
-   <figcaption><strong>Fig 12. </strong>Logging into Alice's account</figcaption>
+   <figcaption><strong>Fig 13. </strong>Logging into Alice's account</figcaption>
 </figure>
 
 <figure>
    <img src="images/logbook8/task3/a/2.png" alt="Alice's homepage where we can see her salary" width="50%" />
-   <figcaption><strong>Fig 13. </strong>Alice's homepage where we can see her salary</figcaption>
+   <figcaption><strong>Fig 14. </strong>Alice's homepage where we can see her salary</figcaption>
 </figure>
 
 2. Determine the payload injection:
@@ -246,7 +247,7 @@ As we have seen in previous tasks, this code is vulnerable to SQL Injection beca
 
 <figure>
    <img src="images/logbook8/task3/a/3.png" alt="Our payload" width="50%" />
-   <figcaption><strong>Fig 14. </strong>Our payload</figcaption>
+   <figcaption><strong>Fig 15. </strong>Our payload</figcaption>
 </figure>
    
 3. Submit the "Edit Profile" form with the payload on the phone number field.
@@ -255,7 +256,7 @@ As we can see, Alice's salary has been changed to 123456.
 
 <figure>
    <img src="images/logbook8/task3/a/4.png" alt="Alice's homepage with her new salary" width="50%" />
-   <figcaption><strong>Fig 15. </strong>Alice's homepage with her new salary</figcaption>
+   <figcaption><strong>Fig 16. </strong>Alice's homepage with her new salary</figcaption>
 </figure>
 
 ### 2. Modify other people’s salary
@@ -281,7 +282,7 @@ As we can see, Alice's salary has been changed to 123456.
 
 <figure>
    <img src="images/logbook8/task3/b/1.png" alt="Our payload" width="50%" />
-   <figcaption><strong>Fig 16. </strong>Our payload</figcaption>
+   <figcaption><strong>Fig 17. </strong>Our payload</figcaption>
 </figure>
 
 3. Submit the "Edit Profile" form with the payload on the phone number field.
@@ -295,14 +296,14 @@ As we can see, Alice's salary has been changed to 123456.
 
 <figure>
    <img src="images/logbook8/task3/b/2.png" alt="Logging into Bobby's account" width="50%" />
-   <figcaption><strong>Fig 17. </strong>Logging into Bobby's account</figcaption>
+   <figcaption><strong>Fig 18. </strong>Logging into Bobby's account</figcaption>
 </figure>
 
 As we can see, Bobby's salary has been changed to 1.
 
 <figure>
    <img src="images/logbook8/task3/b/3.png" alt="Bobby's new salary" width="50%" />
-   <figcaption><strong>Fig 18. </strong>Bobby's new salary</figcaption>
+   <figcaption><strong>Fig 19. </strong>Bobby's new salary</figcaption>
 </figure>
 
 ### 3. Modify other people’s password
@@ -335,7 +336,7 @@ As we can see, Bobby's salary has been changed to 1.
 
 <figure>
    <img src="images/logbook8/task3/c/1.png" alt="Our payload" width="50%" />
-   <figcaption><strong>Fig 19. </strong>Our payload</figcaption>
+   <figcaption><strong>Fig 20. </strong>Our payload</figcaption>
 </figure>
 
 3. Submit the "Edit Profile" form with the payload on the phone number field.
@@ -349,12 +350,12 @@ As we can see, Bobby's salary has been changed to 1.
 
 <figure>
    <img src="images/logbook8/task3/c/2.png" alt="Logging into Bobby's account with the new credentials" width="50%" />
-   <figcaption><strong>Fig 20. </strong>Logging into Bobby's account with the new credentials</figcaption>
+   <figcaption><strong>Fig 21. </strong>Logging into Bobby's account with the new credentials</figcaption>
 </figure>
 
 As we can see, Bobby's password has been changed.
 
 <figure>
    <img src="images/logbook8/task3/c/3.png" alt="Successful login into Bobby's account" width="50%" />
-   <figcaption><strong>Fig 21. </strong>Successful login into Bobby's account</figcaption>
+   <figcaption><strong>Fig 22. </strong>Successful login into Bobby's account</figcaption>
 </figure>
