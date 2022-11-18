@@ -183,6 +183,12 @@ To avoid having previous tasks interfere with this one, we reset the web server 
 
    - Because of the `--build` flag, this command will also check if any containers need to be rebuilt, in particular, the `www` container.
 
+<figure>
+   <img src="images/logbook8/task3/1.png" alt="Resetting the task containers" width="50%" />
+   <figcaption><strong>Fig 11. </strong>Resetting the task containers</figcaption>
+</figure>
+
+
 After the containers are reset, we can take a look at the task.
 In the lab, we are given a piece of vulnerable code, along with a SQL statement:
 
