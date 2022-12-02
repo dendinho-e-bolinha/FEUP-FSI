@@ -370,6 +370,28 @@ As we can see, Bobby's password has been changed.
 
 ## CTF - Challenge 1
 
+In this challenge, we are given a `index.php` file that contains the source code of the website the challenge is running in. We want to login with the admin account.
+
+After analyzing the source code, we can find an unnusual code segment:
+
+```php
+              $username = $_POST['username'];
+               $password = $_POST['password'];
+               
+               $query = "SELECT username FROM user WHERE username = '".$username."' AND password = '".$password."'";
+```
+
+The fields in the sql query provenient from user input (Post request) are not being sanitized and therefore, it is vulnerable to sql injection.
+
+If in the username field we use a payload like `admin'--` and `a` in the password field (irrelevant, but since it is required, needs to be filled), the query sent would be:
+
+```sql
+SELECT username FROM user WHERE username = 'admin'--"' AND password = 'a'
+```
+
+This would bypass the password verification, since it is commented and we would sucessfully have a login as `admin`.
+
+
 <br>
 
 ## CTF - Challenge 2
