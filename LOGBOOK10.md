@@ -213,3 +213,62 @@ Our goal for this task is to automatically add the victim user as our friend whe
       <figcaption><strong>Fig 10. </strong>Alice added as Boby's friend</figcaption>
   </figure>
 
+
+# CTF
+
+## CTF - Challenge 1
+
+In this challenge, we are given webpage, with a simple text input, which we can submit and seems to be reflected in the following page:
+
+![Filling the input](/images/logbook10/ctf1/01.png)
+
+![Redirected Page](/images/logbook10/ctf1/02.png)
+
+Also, we've noticed that the page is constantly being refreshed, which means that the javascript is being re-rendered.
+
+After seeing reflected user input in the website, our first thought was that maybe there was a lack of sanitization and we could inject javascript (XSS), so we tried to fill the input with `<script>alert("XSS")</script>`:
+
+![Javascript injection](/images/logbook10/ctf1/03.png)
+
+So, the website is in fact vulnerable to Cross-Site Scripting. Knowing that we can inject javascript, we can now click that disabled `Give The Flag` button, by using the payload:
+
+```html
+<script>document.getElementById('giveflag').click();</script>
+```
+
+If we wait a few seconds for the page to be refreshed and the "malicious html" rendered, we will get the flag.
+
+
+## CTF - Challenge 2
+
+In this challenge, we are given web-app that seems to be a router manufacturer's app.
+
+### Step 1 - Analyze the app
+
+If we analyze the app, we can see that there are 2 main areas:
+
+The main/login page, in which we can try to login and maybe could lead to an user page.
+
+![Login Page](/images/logbook10/ctf2/01.png)
+
+And the speed test page, in which we can choose an host to ping and get a speed report.
+
+![Speed Test Page](/images/logbook10/ctf2/02.png)
+
+### Step 2 - Test inputs
+
+After testing the sanitization and safety of the fields, we found that there was no XSS, SQLi, SSTI, etc.
+
+However, we found a weird output in the `ping a host` field:
+
+![Ping output](/images/logbook10/ctf2/03.png)
+
+The results were just like the ping command in bash, which led us to wonder if the user input was not being directly sent to a bash command in the server without or with little sanitization.
+
+### Step 3 - Exploit
+
+After finding this, we tried to inject a full bash command, to find the flag location and read the flag, with the payload `; find / -name "flag.txt" 2>/dev/null | xargs cat`.
+
+This gave us the flag:
+
+![Flag](/images/logbook10/ctf2/04.png)
