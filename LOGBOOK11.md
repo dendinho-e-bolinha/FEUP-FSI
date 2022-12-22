@@ -161,10 +161,6 @@ In this task, we will be adding our certificate authority to Firefox's known CA'
 5. We can now access our website without issues or warnings
     ![Accessing www.fsi2022.com](/images/logbook11/task4/4.png)
 
-<br>
-<br>
-<br>
-
 ## Task 5: Launching a Man-In-The-Middle Attack
 
 In this task, we will lauch a MiTM attack on a real website. We chose `example.com` to perform these steps.
@@ -255,8 +251,88 @@ In this task, we will prove that, once the private key of a CA is compromised, w
    
     ![Accessing example.com](/images/logbook11/task6/2.png)
 
+<br>
+<br>
+<br>
+
 # CTF
 
 ## CTF - Desafio 1
 
 ## CTF - Desafio 2
+
+## Recon
+
+In this challenge, we are told that a message is being sent by two people using RSA. The catch is they are using the same modulus during the encryption process. This is important because it leaves the exchanged cryptograms open to what's known as a Common Modulus Attack.
+
+The way a Common Modulus Attack works is as follows:
+
+![Mathematical overview of a Common Modulus Attack](/images/logbook11/ctf2/attack.jpg)
+
+## Exploitation
+
+If `gcd(e1, e2) = 1`, we can use the Extended Euclidean Algorithm to determine `x` and `y`.
+
+We've searched the Internet and found a function, [here](https://www.geeksforgeeks.org/python-program-for-basic-and-extended-euclidean-algorithms-2/), that allows us to calculate `x` and `y`.
+
+```py
+def gcdExtended(a, b):
+    # Base Case
+    if a == 0 :
+        return b,0,1
+             
+    gcd,x1,y1 = gcdExtended(b%a, a)
+     
+    # Update x and y using results of recursive
+    # call
+    x = y1 - (b//a) * x1
+    y = x1
+     
+    return gcd,x,y
+```
+
+After having `x` and `y`, our task becomes much easier since we just have to apply the calculations shown previously to the values provided in the problem statement.
+
+Therefore, to decrypt the flag, we can:
+
+1. Execute `nc ctf-fsi.fe.up.pt 6001`.
+2. Replace the values of `msg1` and `msg2` in the following script and execute it (the values of `msg1`, `msg2` and `n` were shortened): 
+
+    ```py
+    from binascii import unhexlify
+
+    # Use values provided when connecting to the challenge server
+    msg1 = "936155aba2fa2327..."
+    msg2 = "893fa4c8fb75ab15..."
+
+    # Use values provided in the challenge statement
+    n = 298023840073358361140607909469...
+    e1 = 0x10001
+    e2 = 0x10003
+
+    def gcdExtended(a, b): # Extended Euclidean Algorithm
+        # Base Case
+        if a == 0 :
+            return b, 0, 1
+                
+        gcd, x1, y1 = gcdExtended(b % a, a)
+        
+        # Update x and y using results of recursive
+        # call
+        x = y1 - (b // a) * x1
+        y = x1
+        
+        return gcd, x, y
+
+    gcd, x, y = gcdExtended(e1, e2)
+    assert gcd == 1 # Ensure that all assumptions are met before attempting to decrypt flag
+
+    # Convert hex messages to ints so we can perform arithmetic operations with them
+    int1 = int.from_bytes(unhexlify(msg1), "big")
+    int2 = int.from_bytes(unhexlify(msg2), "big")
+
+    decrypted_msg = (pow(int1, x, n) * pow(int2, y, n)) % n # msg = C1^x * C2^y (mod n)
+    print(decrypted_msg.to_bytes(256, "big").decode()) # Convert the message obtained to a string
+    ```
+
+3. Submit the flag!
