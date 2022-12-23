@@ -259,6 +259,62 @@ In this task, we will prove that, once the private key of a CA is compromised, w
 
 ## CTF - Desafio 1
 
+## Recon
+
+In this challenge, we are given a template with some missing fields (`p`, `q`, `d`, and `enc_flag`). If we analyze the comments on the fields, we know that `p` is the closest prime to 2^512 and `q` is the closest prime to 2^513.
+
+To find the values of `p` and `q`, we can write a simple Python script or use a tool like Wolfram Alpha. When we do this, we find that:
+
+When we do this, we find that:
+
+ - `p` = 2^512 + 75
+ - `q` = 2^513 + 159
+
+We are then only missing the value of `d`. We know that `d*e % ((p-1)*(q-1)) = 1`, and we have all the values except `d`, so we can solve the equation to find the value of `d`. Specifically, `d` will be `1 / (e % ((p-1)*(q-1)))`. We can easily calculate this using the `Crypto.Util.number.inverse` function:
+
+```python
+d = inverse(e, (p-1)*(q-1))
+```
+
+## Exploitation
+
+With the values of `p`, `q`, and `d` calculated, we can now retrieve the `enc_flag` string by making a netcat connection to the port where the challenge is hosted.
+
+We could do this manually, but instead we decided to add it to the script to solve the challenge automatically instead of adding extra steps:
+
+```python
+from Crypto.Util.number import inverse
+from binascii import hexlify, unhexlify
+from pwn import *
+
+HOST = "ctf-fsi.fe.up.pt"
+PORT = 6000
+
+p = 2**512 + 75 # next prime 2**512
+q = 2**513 + 159 # next prime 2**513
+n = p*q
+e = 0x10001 # a constant
+d = inverse(e, (p-1)*(q-1)) # a number such that d*e % ((p-1)*(q-1)) = 1
+
+s = remote(HOST, PORT)
+enc_flag = s.recvline().strip().decode()
+
+def enc(x):
+	int_x = int.from_bytes(x, "big")
+	y = pow(int_x,e,n)
+	return hexlify(y.to_bytes(256, 'big'))
+
+def dec(y):
+	int_y = int.from_bytes(unhexlify(y), "big")
+	x = pow(int_y,d,n)
+	return x.to_bytes(256, 'big')
+
+y = dec(enc_flag)
+print(y.decode())
+```
+
+By running this script with all these values filled, we will get the flag.
+
 ## CTF - Desafio 2
 
 ## Recon
