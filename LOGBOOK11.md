@@ -263,14 +263,14 @@ In this task, we will prove that, once the private key of a CA is compromised, w
 
 In this challenge, we are given a template with some missing fields (`p`, `q`, `d`, and `enc_flag`). If we analyze the comments on the fields, we know that `p` is the closest prime to 2^512 and `q` is the closest prime to 2^513.
 
-To find the values of `p` and `q`, we can write a simple Python script or use a tool like Wolfram Alpha. When we do this, we find that:
+To find the values of `p` and `q`, we can write a simple Python script or use a tool like WolframAlpha. When we do this, we find that:
 
 When we do this, we find that:
 
  - `p` = 2^512 + 75
  - `q` = 2^513 + 159
 
-We are then only missing the value of `d`. We know that `d*e % ((p-1)*(q-1)) = 1`, and we have all the values except `d`, so we can solve the equation to find the value of `d`. Specifically, `d` will be `1 / (e % ((p-1)*(q-1)))`. We can easily calculate this using the `Crypto.Util.number.inverse` function:
+We are then only missing the value of `d`. We know that `d*e % ((p-1)*(q-1)) = 1`, and we have all the values except `d`, so we can solve the equation to find the value of `d`. Specifically, `d` will be the inverse of `e` modulus `(p - 1) * (q - 1)`. We can easily calculate this using the `Crypto.Util.number.inverse` function:
 
 ```python
 d = inverse(e, (p-1)*(q-1))
