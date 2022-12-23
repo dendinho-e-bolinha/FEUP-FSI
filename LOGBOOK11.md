@@ -130,8 +130,8 @@ To do so, we followed these steps:
 In this task, we will be adding our certificate authority to Firefox's known CA's to avoid the browser from flaring up at our website.
 
 1. Configure the Apache server, changing the file `bank32_apache_ssl.conf` as follows:
-    ```bash
-        <VirtualHost *:443> 
+    ```xml
+    <VirtualHost *:443> 
         DocumentRoot /var/www/fsi2022
         ServerName www.fsi2022.com
         ServerAlias www.fsi2022A.com
@@ -171,8 +171,8 @@ In this task, we will lauch a MiTM attack on a real website. We chose `example.c
     ```
 
 2. Change the file `bank32_apache_ssl.conf` to
-    ```bash
-        <VirtualHost *:443> 
+    ```xml
+    <VirtualHost *:443> 
         DocumentRoot /var/www/fsi2022
         ServerName www.example.com
         ServerAlias www.fsi2022A.com
@@ -223,14 +223,14 @@ In this task, we will prove that, once the private key of a CA is compromised, w
 4. Move the newly created `server.crt` and `server.key` files inside `image-www/certs/`.
 
 5. Change `bank32_apache_ssl.conf` again to:
-    ```bash
+    ```xml
     <VirtualHost *:443> 
-    DocumentRoot /var/www/fsi2022
-    ServerName www.example.com
-    DirectoryIndex index.html
-    SSLEngine On 
-    SSLCertificateFile /certs/server.crt
-    SSLCertificateKeyFile /certs/server.key
+        DocumentRoot /var/www/fsi2022
+        ServerName www.example.com
+        DirectoryIndex index.html
+        SSLEngine On 
+        SSLCertificateFile /certs/server.crt
+        SSLCertificateKeyFile /certs/server.key
     </VirtualHost>
 
     <VirtualHost *:80> 
@@ -241,7 +241,7 @@ In this task, we will prove that, once the private key of a CA is compromised, w
     ```
 
     and `Dockerfile` in order to contain
-    ```bash
+    ```docker
     COPY ./certs/server.crt ./certs/server.key  /certs/
     ```
 
