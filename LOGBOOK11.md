@@ -332,19 +332,19 @@ If `gcd(e1, e2) = 1`, we can use the Extended Euclidean Algorithm to determine `
 We've searched the Internet and found a function, [here](https://www.geeksforgeeks.org/python-program-for-basic-and-extended-euclidean-algorithms-2/), that allows us to calculate `x` and `y`.
 
 ```py
-def gcdExtended(a, b):
+def gcdExtended(a, b): # Extended Euclidean Algorithm
     # Base Case
     if a == 0 :
         return b,0,1
-             
-    gcd,x1,y1 = gcdExtended(b%a, a)
-     
+            
+    gcd, x1, y1 = gcdExtended(b % a, a)
+    
     # Update x and y using results of recursive
     # call
-    x = y1 - (b//a) * x1
+    x = y1 - (b // a) * x1
     y = x1
-     
-    return gcd,x,y
+    
+    return gcd, x, y
 ```
 
 After having `x` and `y`, our task becomes much easier since we just have to apply the calculations shown previously to the values provided in the problem statement.
