@@ -111,8 +111,44 @@ With this information, a potential exploit would be overwriting the return addre
 
 To overwrite the return address of `main`, we will need to exploit the buffer overflow on the name field. However, we need to defeat the stack canary, otherwise, the program will crash when returning. Therefore, the next step is leaking the stack canary.
 
+#### Leaking the canary
 
+In order to leak the canary, we will need to read values from the stack. As such, the most suitable spot to do it is in the name field, with the help of a format string vulnerability.
 
+With the help of gef, a popular gdb plugin, we can see the value of the stack canary for a given process. Then we can search the stack at the point `fgets` for the name field is called and determine the offset at which the canary is located.
+
+![The canary in the stack](/images/echo/canary-leak/1.png)
+
+> Note: in GEF, `telescope` is an alias for `dereference`
+
+As we can see, the canary for this process is `0x8cdeb100` and it is located at an offset of `+0x0028`. Therefore, since `28 / 4 = 7`, using `%8$x` (`7 + 1`, because grows "downwards") should be enough to leak the stack canary.
+We can test this by executing the program and, later, attaching gdb to it to check if the stack canary is correct or not.
+
+> To attach gdb to a running program, we used the command
+>
+> `LD_LIBRARY_PATH=$PWD gdb program <PID>`
+>
+> where `<PID>` is the PID of the running process.
+
+![Finally leaking the canary](/images/echo/canary-leak/2.png)
+
+#### Changing the return address
+
+After getting the canary, our next job is overwriting the return address, while preserving the canary.
+We still need to determine the return address, however. In this exploit, we will be returning to the function `system`.
+
+To determine the address of `system`, we will use `readelf -s libc.so.6 | grep system`.
+
+```
+2166: 00048150    63 FUNC    WEAK   DEFAULT   15 system@@GLIBC_2.0
+```
+
+This means that the address of `system`, relative to the start of libc, is `0x00048150`.
+Therefore, in our debug session, the address of `system` will be `0xf7d8b000 + 0x00048150 = 0xf7dd3150`.
+
+![Assembly code at 0xf7dd3150](/images/echo/rop/system-address.png)
+
+However, since PIE is enabled, the use of the address `0xf7d8b000` is not reliable. Instead, we need to find a libc address on the stack, so that we can, from there, calculate the base address of libc. To that end, we can exploit the fact that the `main` function returns to a libc address.
 
 
 
