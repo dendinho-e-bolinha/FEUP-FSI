@@ -14,13 +14,13 @@ In fact this was the case:
 
 We also noticed that the server seemed to be re-rendering from time to time, since even if we checked the alert it would appear again.
 
-Furthermore, we noticed in the text `The admin will use this page to check your request.`, which had an hyperlink to `http://ctf-fsi.fe.up.pt:5005/request/<request_id>`.
+Furthermore, we noticed in the text `The admin will use this page to check your request.`, which had a hyperlink to `http://ctf-fsi.fe.up.pt:5005/request/`<request_id>`.
 
 When we went to this page, we saw a weird disabled button with the text `Give the flag`:
 
 ![Give The Flag Button](images/apply-for-flag-2/give_the_flag_page.png)
 
-When we inspected the html of this page, we notied that this button would essentially redirect us to a `/approve` endpoint if clicked:
+When we inspected the html of this page, we noticed that this button would essentially redirect us to a `/approve` endpoint if clicked:
 
 ```html
 <form method="POST" action="/request/<request_id>/approve" role="form">
@@ -37,7 +37,7 @@ When we inspected the html of this page, we notied that this button would essent
 
 So, knowing all this, after some time of trial and error, we tried to develop a payload that would go to the wanted resource and we injected a javascript snippet to click the button.
 
-Note: We did already know the `<request_id>` from the beginning, since it was given in plaintext in the homepage.
+Note: We already knew the `<request_id>` from the beginning, since it was given in plaintext on the homepage.
 
 
 ```html
