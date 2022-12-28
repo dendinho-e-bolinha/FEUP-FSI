@@ -4,24 +4,6 @@
 
 In this challenge, we are given an executable that we must analyze and exploit.
 
-### Testing the program
-
-By running the executable, we are prompted with the message "There is nothing to see here...".
-If we, however, type something in and hit ENTER, what we typed in will be printed back.
-
-![Normal execution of the program](/images/final-format/testing-vulnerabilities/1.png)
-
-That means that our input is being read to a buffer and printed back. Therefore, we decided to test the possibility of a buffer overflow.
-We found that the buffer is, most likely, not susceptible to buffer overflows since we typed in 110 characters, only 60 were printed back and no stack smashing was detected (due to the stack canaries).
-
-![Testing for the possibility of a buffer overflow](/images/final-format/testing-vulnerabilities/2.png)
-
-With buffer overflows out of the way, we tried format string vulnerabilities. Also, the challenge is named Final**Format** so it was very likely that the exploit would be based on format string vulnerabilities.
-
-![Testing for the possibility of a format string vulnerability](/images/final-format/testing-vulnerabilities/3.png)
-
-It worked! This is very good since, with a format string vulnerability, we are able to write to arbitrary addresses in memory. This, in conjunction with a Partial RELRO and no PIE (meaning that the address of the GOT in execution is the same as when `readelf` is run), means that we can overwrite the addresses in the GOT very easily and, thus, when a libc function is called, jump to an arbitrary address in memory and execute that code instead. 
-
 ### Protections
 
 Executing `checksec program`, we get the following output:
@@ -46,7 +28,25 @@ Partial RELRO means that the GOT comes before the BSS section in memory. This me
 
 With stack canaries enabled, we can only perform ROP attacks if we manage to leak the stack canary beforehand.
 
-### Executable symbols
+### Testing the program
+
+By running the executable, we are prompted with the message "There is nothing to see here...".
+If we, however, type something in and hit ENTER, what we typed in will be printed back.
+
+![Normal execution of the program](/images/final-format/testing-vulnerabilities/1.png)
+
+That means that our input is being read to a buffer and printed back. Therefore, we decided to test the possibility of a buffer overflow.
+We found that the buffer is, most likely, not susceptible to buffer overflows since we typed in 110 characters, only 60 were printed back and no stack smashing was detected (due to the stack canaries).
+
+![Testing for the possibility of a buffer overflow](/images/final-format/testing-vulnerabilities/2.png)
+
+With buffer overflows out of the way, we tried format string vulnerabilities. Also, the challenge is named Final**Format** so it was very likely that the exploit would be based on format string vulnerabilities.
+
+![Testing for the possibility of a format string vulnerability](/images/final-format/testing-vulnerabilities/3.png)
+
+It worked! This is very good since, with a format string vulnerability, we are able to write to arbitrary addresses in memory. This, in conjunction with a Partial RELRO and no PIE (meaning that the base address of the GOT in execution is the same as when `readelf` is run), means that we can overwrite the addresses in the GOT very easily and, thus, when a libc function is called, jump to an arbitrary address in memory and execute that code instead. 
+
+### Symbols
 
 At this point, we can execute any piece of code already on the executable (can't be on the stack because of NX).
 However, we don't have any piece of code that can give us a shell.
