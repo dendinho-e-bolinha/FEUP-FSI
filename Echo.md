@@ -235,5 +235,5 @@ r.sendlineafter(b">", b"q")
 r.interactive()
 ```
 
-After having executing the script, an interactive shell on the machine will be available.
+After executing the script, an interactive shell on the machine will be available.
 Then, just execute `cat flag.txt` to get the flag!
