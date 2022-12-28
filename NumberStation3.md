@@ -168,4 +168,4 @@ for possible_key in range(0, 2**16):
         pass
 ```
 
-Having the exploit made, we just need to connect to the server, using `nc ctf-fsi.fe.up.pt 6002` and then copying the encrypted flag to the `ENC_FLAG` variable. After that, just execute the exploit and the unencrypted flag will be printed.
+Having the exploit made, we just need to connect to the server, using `nc ctf-fsi.fe.up.pt 6002`, and then copy the encrypted flag to the `ENC_FLAG` variable. After that, just execute the exploit and the unencrypted flag will be printed.
