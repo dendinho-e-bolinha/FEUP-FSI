@@ -10,7 +10,7 @@ The second one was XSS (Cross-Site Scripting). To test this we submitted the pay
 
 In fact this was the case:
 
-![Initial XSS Payload](images/extra-challenges/apply-for-flag-2/xss_initial_payload.png)
+![Initial XSS Payload](images/apply-for-flag-2/xss_initial_payload.png)
 
 We also noticed that the server seemed to be re-rendering from time to time, since even if we checked the alert it would appear again.
 
@@ -18,7 +18,7 @@ Furthermore, we noticed in the text `The admin will use this page to check your 
 
 When we went to this page, we saw a weird disabled button with the text `Give the flag`:
 
-![Give The Flag Button](images/extra-challenges/apply-for-flag-2/give_the_flag_page.png)
+![Give The Flag Button](images/apply-for-flag-2/give_the_flag_page.png)
 
 When we inspected the html of this page, we notied that this button would essentially redirect us to a `/approve` endpoint if clicked:
 
