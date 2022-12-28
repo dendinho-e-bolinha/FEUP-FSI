@@ -114,7 +114,7 @@ for possible_key in range(0, 2**16):
     key = bytes(key)
 ```
 
-After having all of the keys generated, we can decrypt the flag using them and checking what results contain the substring `flag`.
+After having all of the keys generated, we can decrypt the flag using them and check what results contain the substring `flag`.
 
 ```py
 try:
@@ -137,7 +137,7 @@ import sys
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from binascii import hexlify, unhexlify
 
-ENC_FLAG = "f5fc80417d833c7381ca730..."
+ENC_FLAG = "f5fc80417d833c7381ca730..." # shortened for brevity
 
 # Reverse operation
 def dec(k, c):
