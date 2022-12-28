@@ -110,7 +110,7 @@ We will now step using `ni` until we get to the `system` call.
 
 ![Stack when system is about to be executed](/images/final-format/debug/3.png)
 
-As you can see from the stack view, the argument for this system call is `/bin/bash`, meaning that this method can be used to get a shell on the server.
+As you can see from the stack view, the argument for this system call is `/bin/bash`, meaning that this function can be used to get a shell on the server.
 
 Now that we know what `old_backdoor` does, we can start figuring out what address in the GOT we need to overwrite to jump to `old_backdoor`. For that, we'll restart the debug session, set a breakpoint on `main` and `run` the program.
 
@@ -128,7 +128,7 @@ Here, we want to go inside the function and, as such, we'll execute `si`.
 
 ![Disassembled code inside fflush@plt](/images/final-format/debug/6.png)
 
-As you can see, `fflush@plt`'s second instruction is `jmp    DWORD PTR ds:0x804c010`, meaning that it will jump to the address placed at `0x804c010`. That address is `0xf7dda2c0`, which is the address of libc's `fflush`. Finally, the address `0x804c010`is located in the GOT, meaning that we can overwrite it with the address of `old_backdoor`, making `fflush@plt` jump to `old_backdoor` instead of libc's implementation of `fflush`.
+As you can see, `fflush@plt`'s second instruction is `jmp    DWORD PTR ds:0x804c010`, meaning that it will jump to the address stored at `0x804c010`. That address is `0xf7dda2c0`, which is the address of libc's `fflush`. Finally, the address `0x804c010`is located in the GOT, meaning that we can overwrite it with the address of `old_backdoor`, making `fflush@plt` jump to `old_backdoor` instead of libc's implementation of `fflush`.
 
 ![GOT at the location referenced by fflush@plt](/images/final-format/debug/7.png)
 
